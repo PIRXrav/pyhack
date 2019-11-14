@@ -3,9 +3,7 @@
 """
 Définie la classe Core
 """
-from random import randint
 from village import Village
-from vect import Vect
 
 class Core:
     """
@@ -22,8 +20,10 @@ class Core:
         """
         Initialisation
         """
-        self.plateau = [[1 for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # Convention : True = libre; False = bloqué
+        self.plateau = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # TODO : Vect
         self.pos_x = None
         self.pos_y = None
 
@@ -40,7 +40,7 @@ class Core:
 
         # COLLIDES
         for pos in village.g_xyCollide():
-            self.plateau[pos.x][pos.y] = False
+            self.plateau[pos.x][pos.y] = True
 
         # RENDER
         for pos, char in village.g_xyRender():
@@ -60,17 +60,17 @@ class Core:
         # self.renderTab[self.pos_x][self.pos_y] = ' '
 
         # Tests de collision (Diagonales)
-        if self.plateau[new_pos_x][self.pos_y] != True:
+        if self.plateau[new_pos_x][self.pos_y]:
             #premier chemin libre en x
-            if self.plateau[new_pos_x][new_pos_y] != True:
+            if self.plateau[new_pos_x][new_pos_y]:
                 #deuxieme chemin libre en y
                 self.pos_x, self.pos_y = new_pos_x, new_pos_y
             else:
                 #deuxieme chemin bloque en y
                 self.pos_x, self.pos_y = new_pos_x, self.pos_y
-        elif self.plateau[self.pos_x][new_pos_y] != True:
+        elif self.plateau[self.pos_x][new_pos_y]:
             #premier chemin libre en y
-            if self.plateau[new_pos_x][new_pos_y] != True:
+            if self.plateau[new_pos_x][new_pos_y]:
                 #deuxieme chemin libre en x
                 self.pos_x, self.pos_y = new_pos_x, new_pos_y
             else:
@@ -81,4 +81,4 @@ class Core:
             # Do nothind
             pass
 
-        self.rendertab[self.pos_x][self.pos_y] = '@'
+        # self.rendertab[self.pos_x][self.pos_y] = '@'

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=C0103
 """
 Définie la classe Screen
 """
@@ -62,13 +63,17 @@ class Screen:
         size_tab_x = len(tab)
         size_tab_y = len(tab[0])
 
+        print('\033[{};{}H'.format(0, 0), end='')
         for scr_y in range(height, 0, -1):
             for scr_x in range(width):
 
                 tab_x = scr_x + pos_x - width//2
                 tab_y = scr_y + pos_y - height//2
 
-                if 0 <= tab_x < size_tab_x and 0 <= tab_y < size_tab_y:
+                # TODO : J'aime pas trop ca
+                if tab_x == pos_x and tab_y == pos_y:
+                    sprint("@")
+                elif 0 <= tab_x < size_tab_x and 0 <= tab_y < size_tab_y:
                     char = tab[tab_x][tab_y]
                     sprint(char)
                 else:

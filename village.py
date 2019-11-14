@@ -6,7 +6,6 @@ Un village est un tableau de pièce
 """
 
 from room import Room
-import sys
 
 class Village:
     """
@@ -121,11 +120,11 @@ class Village:
                 return errors
         return 0
 
-
     def generate(self):
         """
         Genere les salles et leurs chemins
         """
+        import sys
         for _ in range(self.NB_ROOMS):
             print(self.addAndConnectNewRoom())
             sys.stdout.flush()
@@ -136,8 +135,8 @@ class Village:
         Retourne un génerateur de couple (Vect , char)
         Permet la création de matrice d'affichage
         """
-        for i, room in enumerate(self.rooms):
-            for pos, char in room.g_xyRender(':'):
+        for room in self.rooms:
+            for pos, char in room.g_xyRender('.'):
                 yield (pos, char)
 
         for path in self.paths:
