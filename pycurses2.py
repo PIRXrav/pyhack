@@ -15,19 +15,20 @@ def main():
     Entry point
     """
     try:
-        #Coeur du jeu
-        core = Core()
-        core.generatePlateau()
         # Ecran
         screen = Screen()
+        #Coeur du jeu
+        core = Core()
+        core.generate()
+
         # boucle d'evenements
         event_loop = MyEventLoop()
         event_loop.start()
 
         while True:
             core.update(event_loop.get())
-            screen.update(core.plateau, core.pos_x, core.pos_y)
-            time.sleep(0)
+            screen.update(core.rendertab, core.pos_x, core.pos_y)
+            time.sleep(0.001)
 
     finally:
         # Attrape erreur

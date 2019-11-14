@@ -172,6 +172,19 @@ class Room():
                 type_char = middle_char
             yield (pos, type_char)
 
+
+    def g_xyCollide(self):
+        """
+        Retourne les points accessible a @
+        Retourne un génerateur de Vect
+        Permet la création de matrice des collision
+        """
+        for x in range(1, self.size.x - 1):
+            for y in range(1, self.size.y - 1):
+                yield self.p[0] + Vect(x, y)
+
+
+
 def tu():
     """
     Test unitaire
@@ -188,6 +201,7 @@ def tu():
 
     door1, path, door2 = room1.connect2(room2)
 
+    # RENDER
     for pos, char in room1.g_xyRender('1'):
         screen[pos.x][pos.y] = char
 
@@ -199,20 +213,35 @@ def tu():
     screen[door1.x][door1.y] = 'A'
     screen[door2.x][door2.y] = 'Z'
 
-    def print_path(d1, path, d2):
-        print("PATH: ", d1, '->', end="")
-        for pos in path:
-            print(pos, "->", end="")
-        print(d2)
+    for y in range(SIZE_Y):
+        for x in range(SIZE_X):
+            print(screen[x][SIZE_Y- y-1], end='')
+        print("")
+
+    # COLLIDES
+    for pos in room1.g_xyCollide():
+        screen[pos.x][pos.y] = '#'
+
+    for pos in room2.g_xyCollide():
+        screen[pos.x][pos.y] = '#'
+
+    for pos in path:
+        screen[pos.x][pos.y] = '#'
 
     for y in range(SIZE_Y):
         for x in range(SIZE_X):
             print(screen[x][SIZE_Y- y-1], end='')
         print("")
 
+
     print("\n Collision : ", room1.isRoomCollide(room2))
     print("Distance square: ", room1.distance(room2))
 
+    def print_path(d1, path, d2):
+        print("PATH: ", d1, '->', end="")
+        for pos in path:
+            print(pos, "->", end="")
+        print(d2)
     print_path(door1, path, door2)
 
 
@@ -223,4 +252,4 @@ if __name__ == '__main__':
         print("\033[0;0H  {}/{}".format(i+1, N))
         tu()
         print()
-        # input()
+        input()

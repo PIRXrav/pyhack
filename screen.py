@@ -15,14 +15,6 @@ class Screen:
     init > update > del
     """
 
-    _TAB2CHAR = {'@': '@',
-                 '#': '#',
-                 ' ': ' '}
-
-    _TAB2COLO = {'@': 2,
-                 '#': 4,
-                 ' ': 1}
-
     def __init__(self):
         """
         Initialise l'affichage
@@ -31,25 +23,28 @@ class Screen:
 
         # Turn off echoing of keys, and enter cbreak mode,
         # where no buffering is performed on keyboard input
-        curses.noecho()
-        curses.cbreak()
-
+        # curses.noecho()
+        # curses.cbreak()
         # keypad mode
-        self.stdscr.keypad(1)
+        # self.stdscr.keypad(1)
 
-        curses.curs_set(0)  # Invisible
+        # curses.curs_set(0)  # Invisible
 
         # Start colors in curses
+        """
         curses.start_color()
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
         curses.start_color()
+        """
+
+        # curses.start_color()
 
         # Clear and refresh the screen for a blank canvas
-        self.stdscr.clear()
-        self.stdscr.idcok(False)
+        # self.stdscr.clear()
+        # self.stdscr.idcok(False)
 
     def __del__(self):
         """
@@ -70,8 +65,8 @@ class Screen:
         size_tab_x = len(tab)
         size_tab_y = len(tab[0])
 
-        putc = lambda x, y, c, col: \
-               self.stdscr.addstr(height - y -1, x, c, curses.color_pair(col))
+        putc = lambda x, y, c: \
+               self.stdscr.addstr(height - y -1, x, c.encode('UTF-8'))
 
         for scr_y in range(height):
             for scr_x in range(width):
@@ -80,11 +75,11 @@ class Screen:
 
                 if 0 <= tab_x < size_tab_x and 0 <= tab_y < size_tab_y:
                     char = tab[tab_x][tab_y]
-                    putc(scr_x, scr_y, self._TAB2CHAR[char], self._TAB2COLO[char])
+                    putc(scr_x, scr_y, char)
                 else:
-                    putc(scr_x, scr_y, ' ', 2)
+                    putc(scr_x, scr_y, ' ')
 
-        putc(0, 0, '@({},{})'.format(pos_x, pos_y), 3)
+        # putc(0, 0, '@({},{})'.format(pos_x, pos_y))
 
         self.stdscr.refresh()
         self.stdscr.erase()

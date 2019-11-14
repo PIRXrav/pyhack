@@ -4,7 +4,8 @@
 Définie la classe Core
 """
 from random import randint
-
+from village import Village
+from vect import Vect
 
 class Core:
     """
@@ -13,30 +14,38 @@ class Core:
         * l' update
     """
     # définition du plateau
-    _XMAX = 200
-    _YMAX = 200
-    _USER = '@'
-    _BLOK = '#'
-    _NOTH = ' '
-
-    #définition du personnage
-    _POSX = 0
-    _POSY = 0
+    _XMAX = 1000
+    _YMAX = 1000
+    _NB_ROOMS = 100
 
     def __init__(self):
         """
         Initialisation
         """
-        self.plateau = [[self._NOTH for _ in range(self._YMAX)] for _ in range(self._XMAX)]
-        self.pos_x = self._POSX
-        self.pos_y = self._POSY
+        self.plateau = [[1 for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        self.pos_x = None
+        self.pos_y = None
 
-    def generatePlateau(self):
+    def generate(self):
         """
         Genere les salles du jeu <=> initialise tab
         """
-        for _ in range(1000):
-            self.plateau[randint(0, self._XMAX-1)][randint(0, self._YMAX-1)] = '#'
+        village = Village(self._XMAX, self._YMAX, self._NB_ROOMS)
+        village.generate()
+
+        self.pos_x = village.rooms[0].p[0].x + 1
+        self.pos_y = village.rooms[0].p[0].y + 1
+
+
+        # COLLIDES
+        for pos in village.g_xyCollide():
+            self.plateau[pos.x][pos.y] = False
+
+        # RENDER
+        for pos, char in village.g_xyRender():
+            self.rendertab[pos.x][pos.y] = char
+
 
     def update(self, event_array):
         """
@@ -48,20 +57,20 @@ class Core:
         new_pos_x = self.pos_x + int(Key.right in event_array) - int(Key.left in event_array)
         new_pos_y = self.pos_y + int(Key.up in event_array) - int(Key.down in event_array)
 
-        self.plateau[self.pos_x][self.pos_y] = ' '
+        # self.renderTab[self.pos_x][self.pos_y] = ' '
 
         # Tests de collision (Diagonales)
-        if self.plateau[new_pos_x][self.pos_y] != '#':
+        if self.plateau[new_pos_x][self.pos_y] != True:
             #premier chemin libre en x
-            if self.plateau[new_pos_x][new_pos_y] != '#':
+            if self.plateau[new_pos_x][new_pos_y] != True:
                 #deuxieme chemin libre en y
                 self.pos_x, self.pos_y = new_pos_x, new_pos_y
             else:
                 #deuxieme chemin bloque en y
                 self.pos_x, self.pos_y = new_pos_x, self.pos_y
-        elif self.plateau[self.pos_x][new_pos_y] != '#':
+        elif self.plateau[self.pos_x][new_pos_y] != True:
             #premier chemin libre en y
-            if self.plateau[new_pos_x][new_pos_y] != '#':
+            if self.plateau[new_pos_x][new_pos_y] != True:
                 #deuxieme chemin libre en x
                 self.pos_x, self.pos_y = new_pos_x, new_pos_y
             else:
@@ -72,4 +81,4 @@ class Core:
             # Do nothind
             pass
 
-        self.plateau[self.pos_x][self.pos_y] = '@'
+        self.rendertab[self.pos_x][self.pos_y] = '@'

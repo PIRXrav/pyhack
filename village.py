@@ -135,7 +135,7 @@ class Village:
         Permet la création de matrice d'affichage
         """
         for i, room in enumerate(self.rooms):
-            for pos, char in room.g_xyRender(chr(i + ord('1'))):
+            for pos, char in room.g_xyRender(':'):
                 yield (pos, char)
 
         for path in self.paths:
@@ -143,35 +143,56 @@ class Village:
             for index, pos in enumerate(path):
                 if index == 0:
                     # Porte de depart
-                    yield (pos, "\033[33m" + 'D' + "\033[0m")
-                    # yield (pos, "\033[33m" + '\u25A0' + "\033[0m")
+                    # yield (pos, "\033[33m" + 'D' + "\033[0m")
+                    yield (pos, 'A')
                 elif index == index_max:
                     # Porte d'arrivé
-                    yield (pos, "\033[33m" + '\u25A1' + "\033[0m")
+                    #yield (pos, "\033[33m" + '\u25A1' + "\033[0m")
+                    yield (pos, "\033[33m" + 'X' + "\033[0m")
+
                 else:
                     yield (pos, "\033[33m" + '\u2591' + "\033[0m")
 
     def g_xyCollide(self):
         """
         Retourne les points accessible a @
-        Retourne un génerateur de couple (Vect , char)
-        Permet la création de matrice des collisions
+        Retourne un génerateur de Vect
+        Permet la création de matrice des collision
         """
-        # TODO: pass
+        # L'interieur des pièces
+        for room in self.rooms:
+            for pos in room.g_xyCollide():
+                yield pos
+
+        # Les chemions
+        for path in self.paths:
+            for pos in path:
+                yield pos
+
 
 
 def main():
     """
     Test unitaire
     """
-    SIZE_Y = 50
+    SIZE_Y = 25
     SIZE_X = 100
     screen = [[' ' for _ in range(SIZE_Y)] for _ in range(SIZE_X)]
 
 
-    village = Village(SIZE_X, SIZE_Y, 20)
+    village = Village(SIZE_X, SIZE_Y, 15)
     village.generate()
 
+    # COLLIDES
+    for pos in village.g_xyCollide():
+        screen[pos.x][pos.y] = "\033[33m" + '\u2591' + "\033[0m"
+
+    for y in range(SIZE_Y):
+        for x in range(SIZE_X):
+            print(screen[x][SIZE_Y - y -1], end='')
+        print("")
+
+    # RENDER
     for pos, char in village.g_xyRender():
         screen[pos.x][pos.y] = char
 
@@ -179,6 +200,7 @@ def main():
         for x in range(SIZE_X):
             print(screen[x][SIZE_Y - y -1], end='')
         print("")
+
 
 
 if __name__ == '__main__':
