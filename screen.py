@@ -3,8 +3,10 @@
 Définie la classe Screen
 """
 
-import curses
 import time
+import sys
+import termios
+import os
 
 from random import choice
 
@@ -19,70 +21,61 @@ class Screen:
         """
         Initialise l'affichage
         """
-        self.stdscr = curses.initscr()
+        # Configuration console
+        self.my_fd = sys.stdin.fileno()
+        self.old = termios.tcgetattr(self.my_fd)
+        new = termios.tcgetattr(self.my_fd)
+        new[3] = new[3] & ~termios.ECHO          # lflags
+        termios.tcsetattr(self.my_fd, termios.TCSADRAIN, new)
 
-        # Turn off echoing of keys, and enter cbreak mode,
-        # where no buffering is performed on keyboard input
-        # curses.noecho()
-        # curses.cbreak()
-        # keypad mode
-        # self.stdscr.keypad(1)
+        # Lancement ecran second
+        print("\033[?1049h\033[H", end="")
+        sys.stdout.flush()
 
-        # curses.curs_set(0)  # Invisible
-
-        # Start colors in curses
-        """
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
-        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        curses.start_color()
-        """
-
-        # curses.start_color()
-
-        # Clear and refresh the screen for a blank canvas
-        # self.stdscr.clear()
-        # self.stdscr.idcok(False)
+        # Bufferisarion de stdout
+        self._BUFFER_SIZE = 500*500
+        sys.stdout = open(sys.stdout.fileno(), "w", self._BUFFER_SIZE)
 
     def __del__(self):
         """
         Remet la console dans l'état initial
         """
-        self.stdscr.keypad(0)
-        curses.echo()
-        curses.nocbreak()
-        curses.endwin()
+        # Etat console
+        termios.tcsetattr(self.my_fd, termios.TCSADRAIN, self.old)
+        # Ecran
+        print("\033[?1049l", end="")
 
     def update(self, tab, pos_x, pos_y):
         """
         Actualise l'écran
         """
-        height, width = self.stdscr.getmaxyx()
-        height -= 1
+
+        def sprint(car):
+            """
+            a
+            """
+            print(car, end='', flush=False)
+
+        height, width = map(int, os.popen('stty size', 'r').read().split())
+        assert height * width <= self._BUFFER_SIZE
 
         size_tab_x = len(tab)
         size_tab_y = len(tab[0])
 
-        putc = lambda x, y, c: \
-               self.stdscr.addstr(height - y -1, x, c.encode('UTF-8'))
-
-        for scr_y in range(height):
+        for scr_y in range(height, 0, -1):
             for scr_x in range(width):
+
                 tab_x = scr_x + pos_x - width//2
                 tab_y = scr_y + pos_y - height//2
 
                 if 0 <= tab_x < size_tab_x and 0 <= tab_y < size_tab_y:
                     char = tab[tab_x][tab_y]
-                    putc(scr_x, scr_y, char)
+                    sprint(char)
                 else:
-                    putc(scr_x, scr_y, ' ')
+                    sprint(' ')
 
-        # putc(0, 0, '@({},{})'.format(pos_x, pos_y))
+        sys.stdout.flush()
 
-        self.stdscr.refresh()
-        self.stdscr.erase()
 
 
 def main():

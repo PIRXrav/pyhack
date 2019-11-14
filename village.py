@@ -6,6 +6,7 @@ Un village est un tableau de pièce
 """
 
 from room import Room
+import sys
 
 class Village:
     """
@@ -127,6 +128,7 @@ class Village:
         """
         for _ in range(self.NB_ROOMS):
             print(self.addAndConnectNewRoom())
+            sys.stdout.flush()
 
     def g_xyRender(self):
         """
@@ -143,14 +145,12 @@ class Village:
             for index, pos in enumerate(path):
                 if index == 0:
                     # Porte de depart
-                    # yield (pos, "\033[33m" + 'D' + "\033[0m")
-                    yield (pos, 'A')
+                    yield (pos, "\033[33m" + 'D' + "\033[0m")
                 elif index == index_max:
                     # Porte d'arrivé
-                    #yield (pos, "\033[33m" + '\u25A1' + "\033[0m")
-                    yield (pos, "\033[33m" + 'X' + "\033[0m")
-
+                    yield (pos, "\033[33m" + '\u25A1' + "\033[0m")
                 else:
+                    # Chemin
                     yield (pos, "\033[33m" + '\u2591' + "\033[0m")
 
     def g_xyCollide(self):

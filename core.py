@@ -14,9 +14,9 @@ class Core:
         * l' update
     """
     # définition du plateau
-    _XMAX = 1000
-    _YMAX = 1000
-    _NB_ROOMS = 100
+    _XMAX = 300
+    _YMAX = 300
+    _NB_ROOMS = 150
 
     def __init__(self):
         """
