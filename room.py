@@ -75,32 +75,11 @@ class Room():
             return False
         return True
 
-
     def connect(self, other_room):
         """
         crée le chemin entre les deux salles
         """
-        # TODO: PAS A JOUR
-        # start_point = self.newRandomPointInRoom()
-        # end_point = other_room.newRandomPointInRoom()
-        # path = []
-        # while start_point != end_point:
-        #     if start_point.x != end_point.x:  # deplacement en x
-        #         depl = Vect(2*int(end_point.x > start_point.x)-1, 0)
-        #     else: # deplacement en y
-        #         depl = Vect(0, 2*int(end_point.y > start_point.y)-1)
-        #     start_point = start_point + depl
-        #     if not other_room.isPointCollide(start_point) and \
-        #        not self.isPointCollide(start_point):
-        #         path.append(start_point)
-        # return path
-
-    def connect2(self, other_room):
-        """
-        crée le chemin entre les deux salles
-        """
         assert not self.isRoomCollide(other_room), "Les salles se superposent"
-        # TODO: Crée une class Path
 
         door1 = self.newRandomPointInRoom()
         door2 = other_room.newRandomPointInRoom()
@@ -132,6 +111,7 @@ class Room():
 
 
         assert len(path) >= self._OFFSET_COLLIDE, 'Chemin trop court'
+        # On retourne un tripet porte, chemin, porte
         return (door1, path, door2)
 
     def distance(self, other_room):
@@ -199,7 +179,7 @@ def tu():
     while room1.isRoomCollide(room2):
         room2 = Room(SIZE_X, SIZE_Y)
 
-    door1, path, door2 = room1.connect2(room2)
+    door1, path, door2 = room1.connect(room2)
 
     # RENDER
     for pos, char in room1.g_xyRender('1'):

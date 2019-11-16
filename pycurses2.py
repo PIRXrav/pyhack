@@ -27,7 +27,7 @@ def main():
 
         while True:
             core.update(event_loop.get())
-            screen.update(core.rendertab, core.pos_x, core.pos_y)
+            screen.update(core.rendertab, core.pos)
             time.sleep(0.001)
 
     finally:

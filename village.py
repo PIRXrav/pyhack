@@ -110,7 +110,7 @@ class Village:
                 if self.isCollideRoom(room):
                     continue
                 # Nouveau chemin
-                door1, path, door2 = room.connect2(self._getNearestRoom(room))
+                door1, path, door2 = room.connect(self._getNearestRoom(room))
                 if self.isCollidePath(path):
                     # Si le chemin est faux, on génere une nouvelle salle
                     continue
