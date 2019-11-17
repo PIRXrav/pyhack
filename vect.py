@@ -14,6 +14,10 @@ class Vect():
         """ v = (x, y) """
         self.x, self.y = x, y
 
+    def copy(self):
+        """ Copie un vecteur """
+        return Vect(self.x, self.y)
+
     def __add__(self, other):
         """
         Retourne la somme de deux vecteurs
@@ -82,6 +86,15 @@ class Vect():
         """
         return self.x != v.x or self.y != v.y
 
+    def __str__(self):
+        """
+        str(point) => "(x, y)"
+        """
+        return "({},{})".format(self.x, self.y)
+
+#
+#   Opérations sur les points
+#
 
     def dirrectionTo(self, p2):
         """
@@ -111,7 +124,7 @@ class Vect():
 
     def __or__(self, v):
         """
-        Retourne un vecteur aléatoire entre self et v
+        Retourne un point aléatoire entre self et v
         Exemple : V = v1 | v2
         """
         return Vect(randint(self.x, v.x), randint(self.y, v.y))
@@ -129,11 +142,89 @@ class Vect():
         """
         return sqrt(self.distanceSquare(other))
 
-    def __str__(self):
+    def g_bresenham_line(self, pos1):
         """
-        str(point) => "(x, y)"
+        algorithme de tracé de segment de Bresenham
         """
-        return "({},{})".format(self.x, self.y)
+        delta = Vect(abs(pos1.x - self.x), abs(pos1.y - self.y))
+        pos = self.copy()
+        s_vect = Vect(-1 if self.x > pos1.x else 1, -1 if self.y > pos1.y else 1)
+        if delta.x > delta.y:
+            err = delta.x / 2.0
+            while pos.x != pos1.x:
+                yield pos
+                err -= delta.y
+                if err < 0:
+                    pos.y += s_vect.y
+                    err += delta.x
+                pos.x += s_vect.x
+        else:
+            err = delta.y / 2.0
+            while pos.y != pos1.y:
+                yield pos
+                err -= delta.x
+                if err < 0:
+                    pos.x += s_vect.x
+                    err += delta.y
+                pos.y += s_vect.y
+        yield pos
+
+
+    def g_andres_circle(self, radius):
+        """
+        algorithme de tracé de cercle d'Andres
+        Retourne un génerateur sur tous les points
+        """
+        f = 1 - radius
+        ddf_x = 1
+        ddf_y = -2 * radius
+        x = 0
+        y = radius
+
+        yield self + Vect(0, +radius)
+        yield self + Vect(0, -radius)
+        yield self + Vect(+radius, 0)
+        yield self + Vect(-radius, 0)
+
+        while x < y:
+            if f >= 0:
+                y -= 1
+                ddf_y += 2
+                f += ddf_y
+            x += 1
+            ddf_x += 2
+            f += ddf_x
+            yield self + Vect(+x, +y)
+            yield self + Vect(-x, +y)
+            yield self + Vect(+x, -y)
+            yield self + Vect(-x, -y)
+            yield self + Vect(+y, +x)
+            yield self + Vect(-y, +x)
+            yield self + Vect(+y, -x)
+            yield self + Vect(-y, -x)
+
+
+    def g_rect(self, cote):
+        """
+        Retourne un generateur sur tous les points formant
+        le contour du rectangle ou self est le centre
+        (Croisement des diagonales)
+        """
+        # TODO : une seul boucle sans condition !
+        pos = self + Vect(cote.x, cote.y)
+        while pos != self + Vect(+cote.x, -cote.y):
+            pos += Vect(0, -1)
+            yield pos
+        while pos != self + Vect(-cote.x, -cote.y):
+            pos += Vect(-1, 0)
+            yield pos
+        while pos != self + Vect(-cote.x, +cote.y):
+            pos += Vect(0, 1)
+            yield pos
+        while pos != self + Vect(+cote.x, +cote.y):
+            pos += Vect(1, 0)
+            yield pos
+
 
 def tu():
     """

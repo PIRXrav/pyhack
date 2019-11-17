@@ -16,7 +16,7 @@ class Core:
     # définition du plateau
     _XMAX = 300
     _YMAX = 300
-    _NB_ROOMS = 350
+    _NB_ROOMS = 150
 
     def __init__(self):
         """
@@ -79,4 +79,28 @@ class Core:
             # Do nothind
             pass
 
-        # self.rendertab[self.pos_x][self.pos_y] = '@'
+    def render(self, scr_size):
+        """
+        retoure un génerateur des caractères à affiche
+        suivant l'ordre d'affichage
+        fc(vision, rendu, objets)
+        """
+        def g_pos(scr_size):
+            """
+            Retourne un générateur sur tous les position de l'écran
+            dans l'ordre d'affichage
+            """
+            for scr_y in range(scr_size.y, 0, -1):
+                for scr_x in range(scr_size.x):
+                    yield Vect(scr_x, scr_y)
+
+        tab_xy_max = Vect(self._XMAX, self._YMAX)
+
+        for scr in g_pos(scr_size):
+            tab_xy = scr + self.pos - scr_size // 2
+            if self.pos == tab_xy:
+                yield '@'
+            elif Vect(0, 0) <= tab_xy < tab_xy_max:
+                yield self.rendertab[tab_xy.x][tab_xy.y]
+            else:
+                yield ' '
