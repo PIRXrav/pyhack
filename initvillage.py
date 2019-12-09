@@ -5,7 +5,7 @@ Définie la classe Village
 Un village est un tableau de pièce
 """
 
-from room import Room
+from initroom import Room
 
 class Village:
     """

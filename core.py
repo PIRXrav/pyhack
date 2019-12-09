@@ -3,7 +3,7 @@
 """
 Définie la classe Core
 """
-from village import Village
+from initvillage import Village
 from vect import Vect
 
 
@@ -14,17 +14,20 @@ class Core:
         * l' update
     """
     # définition du plateau
-    _XMAX = 300
-    _YMAX = 300
-    _NB_ROOMS = 150
+    _XMAX = 100
+    _YMAX = 100
+    _NB_ROOMS = 50
 
     def __init__(self):
         """
         Initialisation
         """
-        # Convention : True = libre; False = bloqué
+        # Matrice de collision onvention : True = libre; False = bloqué
         self.plateau = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # Matrice de rendu
         self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # Matrice de vision True = VIsible. False = invisible
+        self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # Position @
         self.pos = Vect()
 
@@ -45,13 +48,11 @@ class Core:
         for pos, char in village.g_xyRender():
             self.rendertab[pos.x][pos.y] = char
 
-
     def update(self, events):
         """
         Met le jeu à jour fc(tous les events)
         """
         from pynput.keyboard import Key
-
         # position desire (componsation des fleches opposées)
         new_pos = self.pos + \
                   Vect(int(Key.right in events) - int(Key.left in events),
@@ -79,6 +80,29 @@ class Core:
             # Do nothind
             pass
 
+        def g_case_visible(tab_collide, center, radius):
+            """
+            retourne sur toutes les cases visibles
+            depuis un point center dans un rayon radius
+            """
+            # Nb : prend les segments depuis un cercle et non un rect
+            # n'est pas OK
+            border = center.g_rect(Vect(radius, radius))
+            for bordure_pos in border:
+                for pos in center.g_bresenham_line(bordure_pos):
+                    if center.distance(pos) >= radius:
+                        break
+                    if not Vect(0, 0) <= pos < Vect(self._XMAX, self._YMAX):
+                        break
+                    if not tab_collide[pos.x][pos.y]:
+                        yield pos
+                        break
+                    yield pos
+
+        for pos in g_case_visible(self.plateau, self.pos, 10):
+            self.mat_view[pos.x][pos.y] = True
+
+
     def render(self, scr_size):
         """
         retoure un génerateur des caractères à affiche
@@ -98,9 +122,18 @@ class Core:
 
         for scr in g_pos(scr_size):
             tab_xy = scr + self.pos - scr_size // 2
-            if self.pos == tab_xy:
-                yield '@'
-            elif Vect(0, 0) <= tab_xy < tab_xy_max:
-                yield self.rendertab[tab_xy.x][tab_xy.y]
+
+            if Vect(0, 0) <= tab_xy < tab_xy_max:
+                # Dans ecran
+                if self.mat_view[tab_xy.x][tab_xy.y]:
+                    # Visible
+                    if self.pos == tab_xy:
+                        # Position joueur
+                        yield '@'
+                    else:
+                        # Terrain
+                        yield self.rendertab[tab_xy.x][tab_xy.y]
+                else:
+                    yield ' '
             else:
                 yield ' '
