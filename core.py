@@ -6,6 +6,7 @@ Définie la classe Core
 from initvillage import Village
 from vect import Vect
 
+from entity import Player
 
 class Core:
     """
@@ -14,9 +15,9 @@ class Core:
         * l' update
     """
     # définition du plateau
-    _XMAX = 100
-    _YMAX = 100
-    _NB_ROOMS = 50
+    _XMAX = 300
+    _YMAX = 200
+    _NB_ROOMS = 20
 
     def __init__(self):
         """
@@ -29,7 +30,7 @@ class Core:
         # Matrice de vision True = VIsible. False = invisible
         self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # Position @
-        self.pos = Vect()
+        self.player = Player(0, 0)
 
     def generate(self):
         """
@@ -38,7 +39,7 @@ class Core:
         village = Village(self._XMAX, self._YMAX, self._NB_ROOMS)
         village.generate()
 
-        self.pos = village.rooms[0].p[0] + village.rooms[0].size // 2
+        self.player.pos = village.rooms[0].p[0] + village.rooms[0].size // 2
 
         # COLLIDES
         for pos in village.g_xyCollide():
@@ -54,52 +55,14 @@ class Core:
         """
         from pynput.keyboard import Key
         # position desire (componsation des fleches opposées)
-        new_pos = self.pos + \
-                  Vect(int(Key.right in events) - int(Key.left in events),
-                       int(Key.up in events) - int(Key.down in events))
+        depl = Vect(int(Key.right in events) - int(Key.left in events),
+                    int(Key.up in events) - int(Key.down in events))
 
-        # Tests de collision (Diagonales)
-        if self.plateau[new_pos.x][self.pos.y]:
-            #premier chemin libre en x
-            if self.plateau[new_pos.x][new_pos.y]:
-                #deuxieme chemin libre en y
-                self.pos = new_pos
-            else:
-                #deuxieme chemin bloque en y
-                self.pos.x = new_pos.x
-        elif self.plateau[self.pos.x][new_pos.y]:
-            #premier chemin libre en y
-            if self.plateau[new_pos.x][new_pos.y]:
-                #deuxieme chemin libre en x
-                self.pos = new_pos
-            else:
-                #deuxieme chemin bloque en x
-                self.pos.y = new_pos.y
-        else:
-            # Aucun chemin libre
-            # Do nothind
-            pass
+        # Mise a jour du personnage
+        self.player.update(self.plateau, depl)
 
-        def g_case_visible(tab_collide, center, radius):
-            """
-            retourne sur toutes les cases visibles
-            depuis un point center dans un rayon radius
-            """
-            # Nb : prend les segments depuis un cercle et non un rect
-            # n'est pas OK
-            border = center.g_rect(Vect(radius, radius))
-            for bordure_pos in border:
-                for pos in center.g_bresenham_line(bordure_pos):
-                    if center.distance(pos) >= radius:
-                        break
-                    if not Vect(0, 0) <= pos < Vect(self._XMAX, self._YMAX):
-                        break
-                    if not tab_collide[pos.x][pos.y]:
-                        yield pos
-                        break
-                    yield pos
-
-        for pos in g_case_visible(self.plateau, self.pos, 10):
+        # Mise a jout de la cartograpgie
+        for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
 
 
@@ -121,15 +84,15 @@ class Core:
         tab_xy_max = Vect(self._XMAX, self._YMAX)
 
         for scr in g_pos(scr_size):
-            tab_xy = scr + self.pos - scr_size // 2
+            tab_xy = scr + self.player.pos - scr_size // 2
 
             if Vect(0, 0) <= tab_xy < tab_xy_max:
                 # Dans ecran
                 if self.mat_view[tab_xy.x][tab_xy.y]:
                     # Visible
-                    if self.pos == tab_xy:
+                    if tab_xy == self.player.pos:
                         # Position joueur
-                        yield '@'
+                        yield self.player.char
                     else:
                         # Terrain
                         yield self.rendertab[tab_xy.x][tab_xy.y]

@@ -13,8 +13,8 @@ class Room():
     et de la connecter à d'autres.
     """
     #Dimentions maximales minimales
-    _VECT_COTE_MIN = Vect(4, 3)
-    _VECT_COTE_MAX = Vect(10, 5)
+    _VECT_COTE_MIN = Vect(8, 6)
+    _VECT_COTE_MAX = Vect(15, 10)
 
     # Espace autour de la pièce
     _OFFSET_COLLIDE = 2
@@ -60,6 +60,11 @@ class Room():
         """
         return self.p[0] <= point <= self.p[2]
 
+    def isPointCollideWithMargin1(self, point):
+        """
+        Retourne si le point touche la salle avec une marge de 1 vers l'exterieur
+        """
+        return self.p[0]-Vect(1, 1) <= point <= self.p[2]
 
     def isRoomCollide(self, other_room):
         """
