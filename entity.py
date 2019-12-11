@@ -7,6 +7,18 @@ Permet de modeliser le personnage et des monstre
 
 from vect import Vect
 
+
+class Entity:
+    """
+    Entity
+    """
+    def __init__(self):
+        self.hp = 100
+        self.weapon = "Gun n°5"
+        # weapon
+        self.nb_bullet = 1
+        self.shoot_tempo = 3
+
 class Player():
     """
     Classe Player :
@@ -17,20 +29,11 @@ class Player():
         """
         self.pos = Vect(x, y)
         self.direction = Vect(1, 0)
-
         self.distance_view = 5
-        self.hp = 100
 
-        self.name = "Boby"
-
-        self.char = '@'
-
-
-        # weapon
         self.dammage = 10
-        self.weapon = "Gun n°5"
-        self.nb_bullet = 1
-        self.shoot_tempo = 3
+        # RENDER
+        self.char = '@'
 
     def g_case_visible(self, mat_collide):
         """
@@ -62,9 +65,6 @@ class Player():
         Met à jour la position du personnage en fonction des evenements
         et de mat_collide
         """
-        """
-        Mise a jour de la position et de la direction en fonction des events
-        """
         if depl_vect != Vect(0, 0):
             self.direction = depl_vect
             new_pos = self.pos + depl_vect
@@ -90,9 +90,15 @@ class Player():
                 # Do nothind
                 pass
 
+    def render(self):
+        """
+        Retourne le char à afficher
+        """
+        return self.char
+
 class Bullet:
     """
-    Classe Player :
+    Classe Bullet :
     """
     def __init__(self, pos, directions, dammage):
         """
@@ -101,6 +107,7 @@ class Bullet:
         self.pos = pos
         self.direction = directions
         self.dammage = dammage
+        self.chars = ['>', '/', '^', '\\', '<', '/', 'v', '\\']
 
     def update(self, mat_collide):
         """
@@ -114,8 +121,7 @@ class Bullet:
         """
         Retourne le char à afficher
         """
-        # TODO : style
-        return '*'
+        return self.chars[int(self.direction.angle()/2/3.1415 * 8)]
 
     def __str__(self):
         return "(*:{})".format(self.pos)
@@ -124,10 +130,6 @@ def main():
     """
     Test unitaire
     """
-    SIZE_Y = 25
-    SIZE_X = 100
-    screen = [[' ' for _ in range(SIZE_Y)] for _ in range(SIZE_X)]
-
 
 if __name__ == '__main__':
     main()

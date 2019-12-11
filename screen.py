@@ -11,7 +11,6 @@ import sys
 import termios
 import os
 
-from itertools import chain
 from vect import Vect
 
 class Screen:
@@ -44,6 +43,9 @@ class Screen:
         self.my_print = sys.stdout.write
         self.my_flush = sys.stdout.flush
 
+        # Taille de l'écran
+        self.size = Vect(0, 0)
+
     def __del__(self):
         """
         Remet la console dans l'état initial
@@ -60,16 +62,29 @@ class Screen:
         # bof ...
         H, W = map(int, os.popen('stty size', 'r').read().split())
         assert H * W <= self._BUFFER_SIZE
-        return Vect(W, H)
+        self.size = Vect(W, H)
+        return self.size
 
-    def update(self, chars):
+    def g_pos(self):
+        """
+        Retourne un générateur sur tous les position de l'écran
+        dans l'ordre d'affichage
+        """
+        for scr_y in range(self.size.y-1, 0, -1):
+            for scr_x in range(self.size.x):
+                yield Vect(scr_x, scr_y)
+
+    def update(self, scr_tab):
         """
         Actualise l'écran
-        chars : generateur de caractères ordonnés
         """
-        for char in chain('\033[0;0H', chars):
-            self.my_print(char) # <=> print(char, end='', flush=False)
+        self.my_print('\033[0;0H')
+        for scr_pos in self.g_pos():
+            self.my_print(scr_tab[scr_pos.x][scr_pos.y])# <=> print(char, end='', flush=False)
+
         self.my_flush()
+
+
 
 
 def main():

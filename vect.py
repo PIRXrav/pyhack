@@ -4,7 +4,7 @@
 Définie la classe Vect
 """
 from random import randint
-from math import sqrt
+from math import sqrt, atan2
 
 class Vect():
     """
@@ -142,6 +142,12 @@ class Vect():
         """
         return sqrt(self.distanceSquare(other))
 
+    def angle(self):
+        """
+        Retourne l'angle forme entre dy et dx (rad)
+        """
+        return atan2(self.y, self.x)
+
     def g_bresenham_line(self, pos1):
         """
         algorithme de tracé de segment de Bresenham
@@ -210,7 +216,6 @@ class Vect():
         le contour du rectangle ou self est le centre
         (Croisement des diagonales)
         """
-        # TODO : une seul boucle sans condition !
         pos = self + Vect(cote.x, cote.y)
         while pos != self + Vect(+cote.x, -cote.y):
             pos += Vect(0, -1)

@@ -6,7 +6,7 @@ Définie la classe Core
 from initvillage import Village
 from vect import Vect
 
-from entity import Player, Bullet
+from entity import *
 
 class Core:
     """
@@ -25,16 +25,19 @@ class Core:
         """
         # Matrice de collision onvention : True = libre; False = bloqué
         self.plateau = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
-        # Matrice de rendu
-        self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # Matrice de vision True = VIsible. False = invisible
         self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+
+        # Matrice d'affichage du village
+        self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+
         # Position @
         self.player = Player(0, 0)
         self.bullets = []
 
         self.cpt = 0
 
+        self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
     def generate(self):
         """
         Genere les salles du jeu <=> initialise tab
@@ -65,59 +68,58 @@ class Core:
                     int(Key.up in events) - int(Key.down in events))
 
         # Mise a jour du personnage
-        # Shoot ?
         self.player.update(self.plateau, depl)
-        if Key.space in events and self.cpt >10:
+        # Shoot ?
+        if Key.space in events and self.cpt >= 3:
             self.cpt = 0
             self.bullets.append(self.player.shoot())
-
-
         # Mise a jout de la cartograpgie
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
 
+        # Mise à jour des armes
         for i in range(len(self.bullets)-1, -1, -1):
-            res = self.bullets[i].update(self.plateau)
-            if not res:
+            if not self.bullets[i].update(self.plateau):
                 self.bullets.pop(i)
 
+        # Mise a jour des ennemies
 
-    def render(self, scr_size):
+    def render(self, scr_size, g_scr_pos):
         """
         retoure un génerateur des caractères à affiche
         suivant l'ordre d'affichage
         fc(vision, rendu, objets)
         """
-        def g_pos(scr_size):
-            """
-            Retourne un générateur sur tous les position de l'écran
-            dans l'ordre d'affichage
-            """
-            for scr_y in range(scr_size.y-1, 0, -1):
-                for scr_x in range(scr_size.x):
-                    yield Vect(scr_x, scr_y)
 
-        tab_xy_max = Vect(self._XMAX, self._YMAX)
+        scr2mat = lambda scr_pos: scr_pos + self.player.pos - scr_size // 2
+        mat2scr = lambda mat_pos: mat_pos - self.player.pos + scr_size // 2
+        isScrPosInScr = lambda scr_pos: Vect(0, 0) <= scr_pos < scr_size
 
-        for scr in g_pos(scr_size):
-            tab_xy = scr + self.player.pos - scr_size // 2
-
-            if Vect(0, 0) <= tab_xy < tab_xy_max:
+        # Rendu du fond
+        for scr in g_scr_pos:
+            mat_pos = scr2mat(scr)
+            if Vect(0, 0) <= mat_pos < Vect(self._XMAX, self._YMAX):
                 # Dans ecran
-                if self.mat_view[tab_xy.x][tab_xy.y]:
+                if self.mat_view[mat_pos.x][mat_pos.y]:
                     # Visible
-                    if tab_xy == self.player.pos:
-                        # Position joueur
-                        yield self.player.char
-                    elif sum((tab_xy == bult.pos) for bult in self.bullets):
-                         yield '*'
-                    else:
-                        # Terrain
-                        yield self.rendertab[tab_xy.x][tab_xy.y]
+                    self.buffer_window[scr.x][scr.y] = self.rendertab[mat_pos.x][mat_pos.y]
                 else:
-                    yield ' '
+                    self.buffer_window[scr.x][scr.y] = ' '
             else:
-                yield ' '
+                self.buffer_window[scr.x][scr.y] = ' '
 
-        for char in "{},{}".format(self.player.pos, self.bullets):
-            yield char
+        # Rendu des entitées
+        for entity in self.bullets:
+            scr_pos = mat2scr(entity.pos)
+            if isScrPosInScr(scr_pos) and self.mat_view[entity.pos.x][entity.pos.y]:
+                self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
+
+        # Rendu du joueur
+        scr_pos = mat2scr(self.player.pos)
+        self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
+
+        # Text
+        for i, char in enumerate("{},{}".format(self.player.pos, self.bullets)):
+            self.buffer_window[i + 10][scr_size.y - 1] = char
+
+        return self.buffer_window
