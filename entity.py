@@ -6,7 +6,7 @@ Permet de modeliser le personnage et des monstre
 """
 
 from vect import Vect
-
+from astar import calc_path_astart
 
 class Entity:
     """
@@ -125,6 +125,41 @@ class Bullet:
 
     def __str__(self):
         return "(*:{})".format(self.pos)
+
+class Monster:
+    """
+    Classe Bullet :
+    """
+    def __init__(self, pos, directions, dammage):
+        """
+        Personnage
+        """
+        self.pos = pos
+        self.dammage = dammage
+        self.char = 'X'
+
+        # TEMP
+        self.path = []
+
+    def update(self, mat_collide, player_pos):
+        """
+        Met à jour l'enemie
+        """
+        if self.pos.distance(player_pos) <= 20:
+            self.path = calc_path_astart(mat_collide, self.pos, player_pos)
+            if self.path != []:
+                self.pos = self.path[0]
+            return True
+    def render(self):
+        """
+        Retourne le char à afficher
+        """
+        return 'X'
+
+    def __str__(self):
+        return "(*:{})".format(self.pos)
+
+
 
 def main():
     """

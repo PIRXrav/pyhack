@@ -52,7 +52,7 @@ class Village:
         """
         for room in self.rooms:
             for p1 in path1:
-                if room.isPointCollideWithMargin1(p1):
+                if room.isPointCollide(p1):
                     return True
         return False
 

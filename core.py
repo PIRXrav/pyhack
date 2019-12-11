@@ -3,6 +3,8 @@
 """
 Définie la classe Core
 """
+from itertools import chain
+
 from initvillage import Village
 from vect import Vect
 
@@ -15,9 +17,11 @@ class Core:
         * l' update
     """
     # définition du plateau
-    _XMAX = 300
-    _YMAX = 300
-    _NB_ROOMS = 5
+    _XMAX = 100
+    _YMAX = 100
+    _NB_ROOMS = 20
+
+    RULE_VISION = True
 
     def __init__(self):
         """
@@ -34,10 +38,13 @@ class Core:
         # Position @
         self.player = Player(0, 0)
         self.bullets = []
+        self.monsters = []
 
         self.cpt = 0
 
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
+
+
     def generate(self):
         """
         Genere les salles du jeu <=> initialise tab
@@ -54,6 +61,10 @@ class Core:
         # RENDER
         for pos, char in village.g_xyRender():
             self.rendertab[pos.x][pos.y] = char
+
+        # AJout ennemies par rooms
+        for room in village.rooms:
+            self.monsters.append(Monster(room.newRandomPointInRoom(), Vect(0, 0), 0))
 
     def update(self, events):
         """
@@ -76,6 +87,11 @@ class Core:
         # Mise a jout de la cartograpgie
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
+
+        # Monster
+        if self.cpt % 2 == 0:
+            for monster in self.monsters:
+                monster.update(self.plateau, self.player.pos)
 
         # Mise à jour des armes
         for i in range(len(self.bullets)-1, -1, -1):
@@ -100,7 +116,7 @@ class Core:
             mat_pos = scr2mat(scr)
             if Vect(0, 0) <= mat_pos < Vect(self._XMAX, self._YMAX):
                 # Dans ecran
-                if self.mat_view[mat_pos.x][mat_pos.y]:
+                if self.mat_view[mat_pos.x][mat_pos.y] or self.RULE_VISION:
                     # Visible
                     self.buffer_window[scr.x][scr.y] = self.rendertab[mat_pos.x][mat_pos.y]
                 else:
@@ -108,11 +124,21 @@ class Core:
             else:
                 self.buffer_window[scr.x][scr.y] = ' '
 
+
+        # A star DEBUG
+        #for monster in self.monsters:
+        #    for pos in monster.path:
+        #        scr_pos = mat2scr(pos)
+        #        if isScrPosInScr(scr_pos):
+        #            self.buffer_window[scr_pos.x][scr_pos.y] = '.'
+
         # Rendu des entitées
-        for entity in self.bullets:
+        for entity in chain(self.bullets, self.monsters):
             scr_pos = mat2scr(entity.pos)
-            if isScrPosInScr(scr_pos) and self.mat_view[entity.pos.x][entity.pos.y]:
+            if isScrPosInScr(scr_pos) and self.mat_view[entity.pos.x][entity.pos.y] or self.RULE_VISION:
                 self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
+
+
 
         # Rendu du joueur
         scr_pos = mat2scr(self.player.pos)
@@ -133,5 +159,7 @@ class Core:
         for y, str in enumerate(["   N   ", "   ^   ", "W<-o->E", "   v   ", "   S   "]):
             for x, char in enumerate(str):
                 self.buffer_window[scr_size.x - 7 + x][5 - y] = char
+
+
 
         return self.buffer_window

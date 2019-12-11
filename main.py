@@ -28,7 +28,7 @@ def main():
         while True:
             core.update(event_loop.get())
             screen.update(core.render(screen.get_size(), screen.g_pos()))
-            time.sleep(0.1)
+            time.sleep(0.001)
 
     finally:
         # Attrape erreur
