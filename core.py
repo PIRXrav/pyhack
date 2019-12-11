@@ -119,7 +119,19 @@ class Core:
         self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
 
         # Text
-        for i, char in enumerate("{},{}".format(self.player.pos, self.bullets)):
-            self.buffer_window[i + 10][scr_size.y - 1] = char
+        top_bar = "{}".format("Town : Koku <> Not safe place ")
+        for i, char in enumerate(top_bar):
+            self.buffer_window[i][scr_size.y - 1] = char
+        decoration = ['|', '/', '-', '\\']
+        bot_bat1 = "Position : {} | Heal : {} | Dmg : {} | Bullets {} | exp : {}".format(self.player.pos, 10, 1, len(self.bullets), 42)
+        bot_bat2 = "[{}] Level : 0 | Gold : 0 ".format(decoration[self.cpt % 4])
+        for i, char in enumerate(bot_bat1):
+            self.buffer_window[i][1] = char
+        for i, char in enumerate(bot_bat2):
+            self.buffer_window[i][2] = char
+        # Bousolle
+        for y, str in enumerate(["   N   ", "   ^   ", "W<-o->E", "   v   ", "   S   "]):
+            for x, char in enumerate(str):
+                self.buffer_window[scr_size.x - 7 + x][5 - y] = char
 
         return self.buffer_window
