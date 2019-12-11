@@ -13,8 +13,8 @@ class Room():
     et de la connecter à d'autres.
     """
     #Dimentions maximales minimales
-    _VECT_COTE_MIN = Vect(8, 6)
-    _VECT_COTE_MAX = Vect(15, 10)
+    _VECT_COTE_MIN = Vect(10, 6)
+    _VECT_COTE_MAX = Vect(10, 8)
 
     # Espace autour de la pièce
     _OFFSET_COLLIDE = 2

@@ -6,7 +6,7 @@ Définie la classe Core
 from initvillage import Village
 from vect import Vect
 
-from entity import Player
+from entity import Player, Bullet
 
 class Core:
     """
@@ -16,8 +16,8 @@ class Core:
     """
     # définition du plateau
     _XMAX = 300
-    _YMAX = 200
-    _NB_ROOMS = 20
+    _YMAX = 300
+    _NB_ROOMS = 5
 
     def __init__(self):
         """
@@ -31,6 +31,9 @@ class Core:
         self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # Position @
         self.player = Player(0, 0)
+        self.bullets = []
+
+        self.cpt = 0
 
     def generate(self):
         """
@@ -53,17 +56,30 @@ class Core:
         """
         Met le jeu à jour fc(tous les events)
         """
+
+        self.cpt += 1
+
         from pynput.keyboard import Key
         # position desire (componsation des fleches opposées)
         depl = Vect(int(Key.right in events) - int(Key.left in events),
                     int(Key.up in events) - int(Key.down in events))
 
         # Mise a jour du personnage
+        # Shoot ?
         self.player.update(self.plateau, depl)
+        if Key.space in events and self.cpt >10:
+            self.cpt = 0
+            self.bullets.append(self.player.shoot())
+
 
         # Mise a jout de la cartograpgie
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
+
+        for i in range(len(self.bullets)-1, -1, -1):
+            res = self.bullets[i].update(self.plateau)
+            if not res:
+                self.bullets.pop(i)
 
 
     def render(self, scr_size):
@@ -77,7 +93,7 @@ class Core:
             Retourne un générateur sur tous les position de l'écran
             dans l'ordre d'affichage
             """
-            for scr_y in range(scr_size.y, 0, -1):
+            for scr_y in range(scr_size.y-1, 0, -1):
                 for scr_x in range(scr_size.x):
                     yield Vect(scr_x, scr_y)
 
@@ -93,6 +109,8 @@ class Core:
                     if tab_xy == self.player.pos:
                         # Position joueur
                         yield self.player.char
+                    elif sum((tab_xy == bult.pos) for bult in self.bullets):
+                         yield '*'
                     else:
                         # Terrain
                         yield self.rendertab[tab_xy.x][tab_xy.y]
@@ -100,3 +118,6 @@ class Core:
                     yield ' '
             else:
                 yield ' '
+
+        for char in "{},{}".format(self.player.pos, self.bullets):
+            yield char

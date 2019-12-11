@@ -16,15 +16,21 @@ class Player():
         Personnage
         """
         self.pos = Vect(x, y)
+        self.direction = Vect(1, 0)
 
         self.distance_view = 5
         self.hp = 100
-        self.dammage = 10
 
         self.name = "Boby"
-        self.weapon = "Gun n°5"
 
         self.char = '@'
+
+
+        # weapon
+        self.dammage = 10
+        self.weapon = "Gun n°5"
+        self.nb_bullet = 1
+        self.shoot_tempo = 3
 
     def g_case_visible(self, mat_collide):
         """
@@ -45,37 +51,74 @@ class Player():
                     break
                 yield pos
 
+    def shoot(self):
+        """
+        Tire une nouvelle balle
+        """
+        return Bullet(self.pos, self.direction, self.dammage)
+
     def update(self, mat_collide, depl_vect):
         """
         Met à jour la position du personnage en fonction des evenements
         et de mat_collide
         """
-        new_pos = self.pos + depl_vect
-        # Tests de collision (Diagonales)
-        if mat_collide[new_pos.x][self.pos.y]:
-            #premier chemin libre en x
-            if mat_collide[new_pos.x][new_pos.y]:
-                #deuxieme chemin libre en y
-                self.pos = new_pos
+        """
+        Mise a jour de la position et de la direction en fonction des events
+        """
+        if depl_vect != Vect(0, 0):
+            self.direction = depl_vect
+            new_pos = self.pos + depl_vect
+            # Tests de collision (Diagonales)
+            if mat_collide[new_pos.x][self.pos.y]:
+                # premier chemin libre en x
+                if mat_collide[new_pos.x][new_pos.y]:
+                    # deuxieme chemin libre en y
+                    self.pos = new_pos
+                else:
+                    # deuxieme chemin bloque en y
+                    self.pos.x = new_pos.x
+            elif mat_collide[self.pos.x][new_pos.y]:
+                # premier chemin libre en y
+                if mat_collide[new_pos.x][new_pos.y]:
+                    # deuxieme chemin libre en x
+                    self.pos = new_pos
+                else:
+                    # deuxieme chemin bloque en x
+                    self.pos.y = new_pos.y
             else:
-                #deuxieme chemin bloque en y
-                self.pos.x = new_pos.x
-        elif mat_collide[self.pos.x][new_pos.y]:
-            #premier chemin libre en y
-            if mat_collide[new_pos.x][new_pos.y]:
-                #deuxieme chemin libre en x
-                self.pos = new_pos
-            else:
-                #deuxieme chemin bloque en x
-                self.pos.y = new_pos.y
-        else:
-            # Aucun chemin libre
-            # Do nothind
-            pass
+                # Aucun chemin libre
+                # Do nothind
+                pass
 
+class Bullet:
+    """
+    Classe Player :
+    """
+    def __init__(self, pos, directions, dammage):
+        """
+        Personnage
+        """
+        self.pos = pos
+        self.direction = directions
+        self.dammage = dammage
 
+    def update(self, mat_collide):
+        """
+        Met à jour la balle
+        Retourne 1 si elle touche un obstacle
+        """
+        self.pos += self.direction
+        return mat_collide[self.pos.x][self.pos.y]
 
+    def render(self):
+        """
+        Retourne le char à afficher
+        """
+        # TODO : style
+        return '*'
 
+    def __str__(self):
+        return "(*:{})".format(self.pos)
 
 def main():
     """
