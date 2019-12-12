@@ -31,17 +31,18 @@ class Core:
         self.plateau = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # Matrice de vision True = VIsible. False = invisible
         self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
-
         # Matrice d'affichage du village
         self.rendertab = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
 
-        # Position @
+        # Entités
         self.player = Player(0, 0)
         self.bullets = []
         self.monsters = []
 
+        # COmpteur de update
         self.cpt = 0
 
+        # Tableau d'affichage final
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
 
 
@@ -63,8 +64,10 @@ class Core:
             self.rendertab[pos.x][pos.y] = char
 
         # AJout ennemies par rooms
-        for room in village.rooms:
-            self.monsters.append(Monster(room.newRandomPointInRoom(), Vect(0, 0), 0))
+        for i, room in enumerate(village.rooms):
+            if i % 2 == 0:
+                self.monsters.append(Monster(room.newRandomPointInRoom(),
+                                             Vect(0, 0), 0))
 
     def update(self, events):
         """
@@ -88,21 +91,29 @@ class Core:
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
 
-        # Monster
-        if self.cpt % 2 == 0:
-            for monster in self.monsters:
-                monster.update(self.plateau, self.player.pos)
-                if monster.pos == self.player.pos:
-                    self.player.hp -= 1
 
-
-
-        # Mise à jour des armes
+        # Mise à jour des balles
         for i in range(len(self.bullets)-1, -1, -1):
             if not self.bullets[i].update(self.plateau):
                 self.bullets.pop(i)
+            else:
+                for i_monster in range(len(self.monsters)-1, -1, -1):
+                    if self.bullets[i].pos == self.monsters[i_monster].pos:
+                        self.monsters[i_monster].kill()
+                        self.bullets.pop(i)
+                        break
 
-        # Mise a jour des ennemies
+        # Mise à jour des monstres
+        if self.cpt % 3 == 0:
+            for i in range(len(self.monsters)-1, -1, -1):
+                if self.monsters[i].update(self.plateau, self.player.pos):
+                    # Die
+                    self.monsters.pop(i)
+                else:
+                    # Alive
+                    if self.monsters[i].pos == self.player.pos:
+                        self.player.hp -= 1
+
 
     def render(self, scr_size, g_scr_pos):
         """
@@ -128,18 +139,12 @@ class Core:
             else:
                 self.buffer_window[scr.x][scr.y] = ' '
 
-
-        # A star DEBUG
-        #for monster in self.monsters:
-        #    for pos in monster.path:
-        #        scr_pos = mat2scr(pos)
-        #        if isScrPosInScr(scr_pos):
-        #            self.buffer_window[scr_pos.x][scr_pos.y] = '.'
-
         # Rendu des entitées
         for entity in chain(self.bullets, self.monsters):
             scr_pos = mat2scr(entity.pos)
-            if isScrPosInScr(scr_pos) and self.mat_view[entity.pos.x][entity.pos.y] or self.RULE_VISION:
+            if isScrPosInScr(scr_pos) \
+                and self.mat_view[entity.pos.x][entity.pos.y] \
+                or self.RULE_VISION:
                 self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
 
 

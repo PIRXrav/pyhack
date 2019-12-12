@@ -37,7 +37,6 @@ class Player():
         self.char = '@'
 
 
-
     def g_case_visible(self, mat_collide):
         """
         retourne sur toutes les cases visibles
@@ -139,7 +138,6 @@ class Monster:
     IDLE = 0
     RUN = 1
     DECOMPOSITION = 2
-    END = 3
 
     def __init__(self, pos, directions, dammage):
         """
@@ -147,11 +145,13 @@ class Monster:
         """
         self.pos = pos
         self.dammage = dammage
-        self.char = 'X'
 
 
         self.state = self.IDLE
-        self.ttl = 8+1
+        self.ttd = 8 # TIme to die
+        self.chars = ["\033[33m" + 'X' + "\033[0m",
+                      "\033[35m" + 'X' + "\033[0m",
+                      'X']
         # TEMP
         # Le chemin du monstre au joueur
         self.path = []
@@ -160,22 +160,32 @@ class Monster:
         """
         Met à jour l'enemie
         """
-        if self.pos.distance(player_pos) <= 20:
-            self.state = self.RUN
-        else:
-            self.state = self.IDLE
+        if self.state == self.IDLE or self.state == self.RUN:
+            if self.pos.distance(player_pos) <= 10:
+                self.state = self.RUN
+            else:
+                self.state = self.IDLE
 
-        if self.state == self.RUN:
-            self.path = calc_path_astart(mat_collide, self.pos, player_pos)
-            if self.path != []:
-                self.pos = self.path[0]
-            return True
+            if self.state == self.RUN:
+                self.path = calc_path_astart(mat_collide, self.pos, player_pos)
+                if self.path != []:
+                    self.pos = self.path[0]
+            return False
+
+        self.ttd -= 1
+        return self.ttd == 0 # Mort
 
     def render(self):
         """
         Retourne le char à afficher
         """
-        return 'X'
+        return self.chars[self.ttd % len(self.chars)]
+
+    def kill(self):
+        """
+        Elimine le mechant
+        """
+        self.state = self.DECOMPOSITION
 
     def __str__(self):
         return "(*:{})".format(self.pos)
