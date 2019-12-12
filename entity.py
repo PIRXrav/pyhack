@@ -9,34 +9,27 @@ from vect import Vect
 from astar import calc_path_astart
 from random import randint, choice
 
-class Entity:
-    """
-    Entity
-    """
-    def __init__(self):
-        self.hp = 100
-        self.weapon = "Gun n°5"
-        # weapon
-        self.nb_bullet = 1
-        self.shoot_tempo = 3
-
 class Player():
     """
     Classe Player :
     """
+
+    BULLET_MAX = 10
+    HP_MAX = 10
+    START_MONEY = 0
+    CHAR = '@'
+
     def __init__(self, x, y):
         """
         Personnage
         """
         self.pos = Vect(x, y)
         self.direction = Vect(1, 0)
-        self.distance_view = 5
-        self.bullet = 10
-        self.dammage = 10
-        self.hp = 10
-        # RENDER
-        self.char = '@'
-        self.money = 0
+        self.distance_view = 7
+
+        self.bullet = self.BULLET_MAX
+        self.hp = self.HP_MAX
+        self.money = self.START_MONEY
 
     def g_case_visible(self, mat_collide):
         """
@@ -61,7 +54,36 @@ class Player():
         """
         Tire une nouvelle balle
         """
-        return Bullet(self.pos, self.direction, self.dammage)
+        self.bullet -= 1
+        return Bullet(self.pos, self.direction, 42)
+
+    def add_money(self, value):
+        """
+        Ajoute des pièces au Player
+        """
+        assert value >= 0
+        self.money += value
+        return True
+
+    def add_hp(self, value):
+        """
+        Ajoute des HP au Player
+        """
+        assert value >= 0
+        if self.hp == self.HP_MAX:
+            return False
+        self.hp = min(self.hp + value, self.HP_MAX)
+        return True
+
+    def add_bullets(self, value):
+        """
+        Ajoute des balles au Player
+        """
+        assert value >= 0
+        if self.bullet == self.BULLET_MAX:
+            return False
+        self.bullet = min(self.bullet + value, self.BULLET_MAX)
+        return True
 
     def update(self, mat_collide, depl_vect):
         """
@@ -97,12 +119,27 @@ class Player():
         """
         Retourne le char à afficher
         """
-        return self.char
+        return self.CHAR
+
+    def __str__(self):
+        """
+        Retourne une chaine d'affichage
+        """
+        heal_str = '[{}]'.format('\u2665' * int(self.hp / self.HP_MAX * 10)
+                                 + " "* (10-int(self.hp / self.HP_MAX * 10)))
+        bullet_str = '[{}]'.format('|' * (self.bullet)
+                                   + " " * (self.BULLET_MAX - self.bullet))
+
+        return 'Position : {} | HP : {} | Bullets {}'.format(
+            self.pos, heal_str, bullet_str
+        )
 
 class Bullet:
     """
     Classe Bullet :
     """
+    CHARS = ['>', '/', '^', '\\', '<', '/', 'v', '\\']
+
     def __init__(self, pos, directions, dammage):
         """
         Personnage
@@ -110,7 +147,6 @@ class Bullet:
         self.pos = pos
         self.direction = directions
         self.dammage = dammage
-        self.chars = ['>', '/', '^', '\\', '<', '/', 'v', '\\']
 
     def update(self, mat_collide):
         """
@@ -124,7 +160,7 @@ class Bullet:
         """
         Retourne le char à afficher
         """
-        return self.chars[int(self.direction.angle()/2/3.1415 * 8)]
+        return self.CHARS[int(self.direction.angle()/2/3.1415 * 8)]
 
     def __str__(self):
         return "(*:{})".format(self.pos)
@@ -140,7 +176,7 @@ class Monster:
     RUN = 1
     DECOMPOSITION = 2
 
-    def __init__(self, pos, directions, dammage):
+    def __init__(self, pos, dammage):
         """
         Personnage
         """
@@ -192,22 +228,37 @@ class Monster:
         return "(*:{})".format(self.pos)
 
 
-
 class Treasure:
+    """
+    Trésor, peut contenir 3 types d'objet différents :
+        * des sous
+        * des munitions
+        * de la vie
+    """
     HEART = 0
     BULLET = 1
     GOLD = 2
     CHARS = ['\u2665', '\u25B2', '$']
 
-    def __init__(self, pos):
+    def __init__(self, pos, value):
         """
-        Trésor, peut contenir 3 types d'objet différents : des sous, des munitions et de la vie
+        Init
         """
         self.pos = pos
-        self.object = choice([self.HEART, self.BULLET, self.GOLD])     # 0 = vie, 1 = munition, 2 = argent
+        self.object = choice([self.HEART, self.BULLET, self.GOLD])
+        self.value = value
 
     def render(self):
+        """
+        Render
+        """
         return self.CHARS[self.object]
+
+    def get_value(self):
+        """
+        Retourne la valeur du contenue du coffre
+        """
+        return self.value
 
 def main():
     """
