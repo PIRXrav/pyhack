@@ -65,12 +65,7 @@ class Core:
         for pos, char in village.g_xyRender():
             self.rendertab[pos.x][pos.y] = char
 
-        # AJout ennemies par rooms
-        for i, room in enumerate(village.rooms):
-            if i % 2 == 0:
-                self.monsters.append(Monster(room.newRandomPointInRoom(),
-                                             Vect(0, 0), 0))
-        #Ajout de coffres (2 max par room)
+        #Ajout de coffres (2 max par room) | Monsters
         for room in village.rooms:
             self.monsters.append(Monster(room.newRandomPointInRoom(), Vect(0, 0), 0))
             for _ in range(randint(0,2)):
@@ -100,13 +95,6 @@ class Core:
         # Mise a jour de la cartograpgie
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
-
-        # Monster
-        if self.cpt % 2 == 0:
-            for monster in self.monsters:
-                monster.update(self.plateau, self.player.pos)
-                if monster.pos == self.player.pos:
-                    self.player.hp -= 1
 
         # Mise à jour des balles
         for i in range(len(self.bullets)-1, -1, -1):
