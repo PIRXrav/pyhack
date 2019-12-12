@@ -41,9 +41,12 @@ class Core:
         self.bullets = []
         self.monsters = []
         self.treasure = []
+        self.sword = None
 
         # COmpteur de update
-        self.cpt = 0
+        self.cpt_bullet = 0
+        self.cpt_strike = 0
+        self.cpt_monster = 0
 
         # Tableau d'affichage final
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
@@ -78,7 +81,10 @@ class Core:
         """
         Met le jeu à jour fc(tous les events)
         """
-        self.cpt += 1
+
+        self.cpt_monster += 1
+        self.cpt_bullet += 1
+        self.cpt_strike += 1
 
         def get_user_depl(events):
             """
@@ -94,9 +100,13 @@ class Core:
             """
             self.player.update(self.mat_collide, get_user_depl(events))
             # Shoot ? et assez de balles ?
-            if Key.space in events and self.cpt >= 3 and self.player.bullet:
-                self.cpt = 0
+            if Key.space in events and self.cpt_bullet >= 3 and self.player.bullet:
+                self.cpt_bullet = 0
                 self.bullets.append(self.player.shoot())
+            # Strike
+            if Key.shift in events and self.cpt_strike >= 5:
+                self.cpt_strike = 0
+                self.sword = self.player.strike(self.mat_collide)
             # Mise a jour de la cartograpgie
             for pos in self.player.g_case_visible(self.mat_collide):
                 self.mat_view[pos.x][pos.y] = True
@@ -116,19 +126,30 @@ class Core:
                             self.bullets.pop(i)
                             break
 
+        def update_sword():
+            """
+            Mise à jout de l'épée
+            """
+            if self.sword is not None:
+                for i_monster in range(len(self.monsters)-1, -1, -1):
+                    if self.monsters[i_monster].pos in chain(self.sword.pos, [self.player.pos]):
+                        self.monsters[i_monster].kill()
+
         def update_monsters():
             """
             Mise à jour des monstres
             """
-            if self.cpt % 3 == 0:
+            if self.cpt_monster % 3 == 0:
                 for i in range(len(self.monsters)-1, -1, -1):
                     if self.monsters[i].update(self.mat_collide, self.player.pos):
                         # Mort
                         self.monsters.pop(i)
                     else:
-                        # Vivant
-                        if self.monsters[i].pos == self.player.pos:
-                            self.player.hp -= self.monsters[i].dammage
+                         # Vivant, le monstre fait des dégats au joueur
+                        if self.monsters[i].pos == self.player.pos \
+                            and not self.monsters[i].state == 2:
+                            self.player.hp -= 1
+
 
         def update_treasures():
             """
@@ -148,6 +169,7 @@ class Core:
 
         update_player()     # Actualise le depl / tirs / vision
         update_bullets()    # Actualise toutes les balles : kill monsters
+        update_sword()      # Actualise le coup d'épee
         update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
@@ -182,6 +204,21 @@ class Core:
                 or self.RULE_VISION:
                 self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
 
+        #Rendu du coup d'épée
+        if self.sword is not None:
+            for entity in self.sword.pos:
+                scr_pos = mat2scr(entity)
+                if isScrPosInScr(scr_pos) \
+                    and self.mat_view[entity.x][entity.y] \
+                    or self.RULE_VISION:
+                    self.buffer_window[scr_pos.x][scr_pos.y] = self.sword.render()
+            self.sword = None
+
+
+        # Rendu du joueur
+        scr_pos = mat2scr(self.player.pos)
+        self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
+
         # Text
         top_bar = "{}".format("Town : Koku <> Not safe place ")
         for i, char in enumerate(top_bar):
@@ -190,7 +227,7 @@ class Core:
 
         decoration = ['|', '/', '-', '\\']
         bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
-        bot_bat2 = "[{}] Level : 0 | Gold : {} ".format(decoration[self.cpt % 4], self.player.money)
+        bot_bat2 = "[{}] Level : 0 | Gold : {} ".format(decoration[self.cpt_monster % 4], self.player.money)
 
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char

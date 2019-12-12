@@ -57,6 +57,12 @@ class Player():
         self.bullet -= 1
         return Bullet(self.pos, self.direction, 42)
 
+    def strike(self, mat_collide):
+        """
+        Donne un coup d'épée
+        """
+        return Sword(self, mat_collide)
+
     def add_money(self, value):
         """
         Ajoute des pièces au Player
@@ -259,6 +265,19 @@ class Treasure:
         Retourne la valeur du contenue du coffre
         """
         return self.value
+
+
+class Sword:
+    """
+    coup d'épée venant du joueur, touche tous les ennemis dans un rayon de 1 bloc
+    """
+    def __init__(self, player, mat_collide):
+        pos = player.pos.g_rect(Vect(1, 1))
+        self.pos = [strike for strike in pos if mat_collide[strike.x][strike.y]]
+        self.char = '\u25A0'
+
+    def render(self):
+        return self.char
 
 def main():
     """
