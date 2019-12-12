@@ -4,6 +4,7 @@
 Définie la classe Core
 """
 from itertools import chain
+from random import randint
 
 from initvillage import Village
 from vect import Vect
@@ -38,6 +39,7 @@ class Core:
         self.player = Player(0, 0)
         self.bullets = []
         self.monsters = []
+        self.treasure = []
 
         # COmpteur de update
         self.cpt = 0
@@ -68,6 +70,13 @@ class Core:
             if i % 2 == 0:
                 self.monsters.append(Monster(room.newRandomPointInRoom(),
                                              Vect(0, 0), 0))
+        #Ajout de coffres (2 max par room)
+        for room in village.rooms:
+            self.monsters.append(Monster(room.newRandomPointInRoom(), Vect(0, 0), 0))
+            for _ in range(randint(0,2)):
+                self.treasure.append(Treasure(room.newRandomPointInRoom()))
+
+
 
     def update(self, events):
         """
@@ -83,14 +92,21 @@ class Core:
 
         # Mise a jour du personnage
         self.player.update(self.plateau, depl)
-        # Shoot ?
-        if Key.space in events and self.cpt >= 3:
+        # Shoot ? et assez de balles ?
+        if Key.space in events and self.cpt >= 3 and self.player.bullet:
             self.cpt = 0
+            self.player.bullet -= 1
             self.bullets.append(self.player.shoot())
-        # Mise a jout de la cartograpgie
+        # Mise a jour de la cartograpgie
         for pos in self.player.g_case_visible(self.plateau):
             self.mat_view[pos.x][pos.y] = True
 
+        # Monster
+        if self.cpt % 2 == 0:
+            for monster in self.monsters:
+                monster.update(self.plateau, self.player.pos)
+                if monster.pos == self.player.pos:
+                    self.player.hp -= 1
 
         # Mise à jour des balles
         for i in range(len(self.bullets)-1, -1, -1):
@@ -114,6 +130,18 @@ class Core:
                     if self.monsters[i].pos == self.player.pos:
                         self.player.hp -= 1
 
+        # Mise a jour des coffres
+        for i in range(len(self.treasure) - 1, -1, -1):
+            if self.treasure[i].pos == self.player.pos:
+                if self.treasure[i].object == Treasure.HEART:
+                    if self.player.hp == 20:
+                        continue
+                    self.player.hp = min(self.player.hp + 10, 20)
+                elif self.treasure[i].object == Treasure.BULLET:
+                    self.player.bullet += 10
+                else:
+                    self.player.money += 10
+                self.treasure.pop(i)
 
     def render(self, scr_size, g_scr_pos):
         """
@@ -140,7 +168,7 @@ class Core:
                 self.buffer_window[scr.x][scr.y] = ' '
 
         # Rendu des entitées
-        for entity in chain(self.bullets, self.monsters):
+        for entity in chain(self.bullets, self.monsters, self.treasure):
             scr_pos = mat2scr(entity.pos)
             if isScrPosInScr(scr_pos) \
                 and self.mat_view[entity.pos.x][entity.pos.y] \
@@ -158,8 +186,8 @@ class Core:
         for i, char in enumerate(top_bar):
             self.buffer_window[i][scr_size.y - 1] = char
         decoration = ['|', '/', '-', '\\']
-        bot_bat1 = "Position : {} | Heal : {} | Dmg : {} | Bullets {} | Monsters : {}".format(self.player.pos, self.player.hp, 1, len(self.bullets), len(self.monsters))
-        bot_bat2 = "[{}] Level : 0 | Gold : 0 ".format(decoration[self.cpt % 4])
+        bot_bat1 = "Position : {} | Heal : {} | Dmg : {} | Bullets {} | Monsters : {}".format(self.player.pos, self.player.hp, 1, self.player.bullet, len(self.monsters))
+        bot_bat2 = "[{}] Level : 0 | Gold : {} ".format(decoration[self.cpt % 4], self.player.money)
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char
         for i, char in enumerate(bot_bat2):

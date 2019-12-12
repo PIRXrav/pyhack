@@ -7,6 +7,7 @@ Permet de modeliser le personnage et des monstre
 
 from vect import Vect
 from astar import calc_path_astart
+from random import randint, choice
 
 class Entity:
     """
@@ -30,12 +31,12 @@ class Player():
         self.pos = Vect(x, y)
         self.direction = Vect(1, 0)
         self.distance_view = 5
-
+        self.bullet = 10
         self.dammage = 10
         self.hp = 10
         # RENDER
         self.char = '@'
-
+        self.money = 0
 
     def g_case_visible(self, mat_collide):
         """
@@ -191,6 +192,22 @@ class Monster:
         return "(*:{})".format(self.pos)
 
 
+
+class Treasure:
+    HEART = 0
+    BULLET = 1
+    GOLD = 2
+    CHARS = ['\u2665', '\u25B2', '$']
+
+    def __init__(self, pos):
+        """
+        Trésor, peut contenir 3 types d'objet différents : des sous, des munitions et de la vie
+        """
+        self.pos = pos
+        self.object = choice([self.HEART, self.BULLET, self.GOLD])     # 0 = vie, 1 = munition, 2 = argent
+
+    def render(self):
+        return self.CHARS[self.object]
 
 def main():
     """
