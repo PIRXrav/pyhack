@@ -63,6 +63,12 @@ class Player():
         """
         return Bullet(self.pos, self.direction, self.dammage)
 
+    def strike(self, mat_collide):
+        """
+        Donne un coup d'épée
+        """
+        return Sword(self, mat_collide)
+
     def update(self, mat_collide, depl_vect):
         """
         Met à jour la position du personnage en fonction des evenements
@@ -98,6 +104,7 @@ class Player():
         Retourne le char à afficher
         """
         return self.char
+
 
 class Bullet:
     """
@@ -208,6 +215,19 @@ class Treasure:
 
     def render(self):
         return self.CHARS[self.object]
+
+
+class Sword:
+    """
+    coup d'épée venant du joueur, touche tous les ennemis dans un rayon de 1 bloc
+    """
+    def __init__(self, player, mat_collide):
+        pos = player.pos.g_rect(Vect(1, 1))
+        self.pos = [strike for strike in pos if mat_collide[strike.x][strike.y]]
+        self.char ='\u25A0'
+
+    def render(self):
+        return self.char
 
 def main():
     """
