@@ -92,6 +92,10 @@ class Core:
         if self.cpt % 2 == 0:
             for monster in self.monsters:
                 monster.update(self.plateau, self.player.pos)
+                if monster.pos == self.player.pos:
+                    self.player.hp -= 1
+
+
 
         # Mise à jour des armes
         for i in range(len(self.bullets)-1, -1, -1):
@@ -149,7 +153,7 @@ class Core:
         for i, char in enumerate(top_bar):
             self.buffer_window[i][scr_size.y - 1] = char
         decoration = ['|', '/', '-', '\\']
-        bot_bat1 = "Position : {} | Heal : {} | Dmg : {} | Bullets {} | exp : {}".format(self.player.pos, 10, 1, len(self.bullets), 42)
+        bot_bat1 = "Position : {} | Heal : {} | Dmg : {} | Bullets {} | Monsters : {}".format(self.player.pos, self.player.hp, 1, len(self.bullets), len(self.monsters))
         bot_bat2 = "[{}] Level : 0 | Gold : 0 ".format(decoration[self.cpt % 4])
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char

@@ -32,8 +32,11 @@ class Player():
         self.distance_view = 5
 
         self.dammage = 10
+        self.hp = 10
         # RENDER
         self.char = '@'
+
+
 
     def g_case_visible(self, mat_collide):
         """
@@ -130,6 +133,14 @@ class Monster:
     """
     Classe Bullet :
     """
+    """
+    Etat du personnage
+    """
+    IDLE = 0
+    RUN = 1
+    DECOMPOSITION = 2
+    END = 3
+
     def __init__(self, pos, directions, dammage):
         """
         Personnage
@@ -138,7 +149,11 @@ class Monster:
         self.dammage = dammage
         self.char = 'X'
 
+
+        self.state = self.IDLE
+        self.ttl = 8+1
         # TEMP
+        # Le chemin du monstre au joueur
         self.path = []
 
     def update(self, mat_collide, player_pos):
@@ -146,10 +161,16 @@ class Monster:
         Met à jour l'enemie
         """
         if self.pos.distance(player_pos) <= 20:
+            self.state = self.RUN
+        else:
+            self.state = self.IDLE
+
+        if self.state == self.RUN:
             self.path = calc_path_astart(mat_collide, self.pos, player_pos)
             if self.path != []:
                 self.pos = self.path[0]
             return True
+
     def render(self):
         """
         Retourne le char à afficher
