@@ -41,9 +41,11 @@ class Core:
         self.bullets = []
         self.monsters = []
         self.treasure = []
+        self.swords = []
         self.sword = None
 
         # COmpteur de update
+        # TODO : Compteur dans les classes respectives
         self.cpt_bullet = 0
         self.cpt_strike = 0
         self.cpt_monster = 0
@@ -104,9 +106,9 @@ class Core:
                 self.cpt_bullet = 0
                 self.bullets.append(self.player.shoot())
             # Strike
-            if Key.shift in events and self.cpt_strike >= 5:
+            if Key.shift in events and self.cpt_strike >= 4:
                 self.cpt_strike = 0
-                self.sword = self.player.strike(self.mat_collide)
+                self.swords.append(self.player.strike(self.mat_collide))
             # Mise a jour de la cartograpgie
             for pos in self.player.g_case_visible(self.mat_collide):
                 self.mat_view[pos.x][pos.y] = True
@@ -127,13 +129,18 @@ class Core:
                             break
 
         def update_sword():
-            """
+            """²
             Mise à jout de l'épée
             """
-            if self.sword is not None:
-                for i_monster in range(len(self.monsters)-1, -1, -1):
-                    if self.monsters[i_monster].pos in chain(self.sword.pos, [self.player.pos]):
-                        self.monsters[i_monster].kill()
+            for i in range(len(self.swords)-1, -1, -1):
+                if self.swords[i].update(self.mat_collide, self.player.pos):
+                    self.swords.pop(i)
+                else:
+                    for i_monster in range(len(self.monsters)-1, -1, -1):
+                        if self.swords[i].pos == self.monsters[i_monster].pos:
+                            self.monsters[i_monster].kill()
+                            break
+
 
         def update_monsters():
             """
@@ -195,6 +202,7 @@ class Core:
 
         # Rendu des entitées
         for entity in chain(self.bullets,
+                            self.swords,
                             self.monsters,
                             self.treasure,
                             [self.player]):
@@ -203,17 +211,6 @@ class Core:
                 and self.mat_view[entity.pos.x][entity.pos.y] \
                 or self.RULE_VISION:
                 self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
-
-        #Rendu du coup d'épée
-        if self.sword is not None:
-            for entity in self.sword.pos:
-                scr_pos = mat2scr(entity)
-                if isScrPosInScr(scr_pos) \
-                    and self.mat_view[entity.x][entity.y] \
-                    or self.RULE_VISION:
-                    self.buffer_window[scr_pos.x][scr_pos.y] = self.sword.render()
-            self.sword = None
-
 
         # Rendu du joueur
         scr_pos = mat2scr(self.player.pos)

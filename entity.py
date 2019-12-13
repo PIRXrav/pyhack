@@ -61,7 +61,7 @@ class Player():
         """
         Donne un coup d'épée
         """
-        return Sword(self, mat_collide)
+        return Sword(self.pos + self.direction)
 
     def add_money(self, value):
         """
@@ -269,15 +269,35 @@ class Treasure:
 
 class Sword:
     """
-    coup d'épée venant du joueur, touche tous les ennemis dans un rayon de 1 bloc
+    coup d'épée venant du joueur
     """
-    def __init__(self, player, mat_collide):
-        pos = player.pos.g_rect(Vect(1, 1))
-        self.pos = [strike for strike in pos if mat_collide[strike.x][strike.y]]
+    DELTA_POSS = list(Vect(0, 0).g_rect(Vect(1, 1)))
+    CHARS_POSS = HARS = ['-', '/', '|', '\\', '-', '/', '|', '\\']
+
+    def __init__(self, pos):
+
+        self.pos = pos
         self.char = '\u25A0'
+        self.cpt = len(self.DELTA_POSS)-1
+
+
+    def update(self, mat_collide, player_pos):
+        """
+        Met à jour l'enemie
+        """
+
+        if self.cpt < 0:
+            return True
+
+        self.pos = player_pos + self.DELTA_POSS[self.cpt]
+        self.cpt -= 1
+        return False
 
     def render(self):
-        return self.char
+        """
+        render
+        """
+        return self.CHARS_POSS[-self.cpt-1]
 
 def main():
     """
