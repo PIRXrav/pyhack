@@ -94,18 +94,24 @@ def main():
     import time
     from random import choice
 
+
+    tab = [[' ' for x in range(500)] for y in range(500)]
     try:
 
         screen = Screen()
 
         while True:
-            size = screen.get_size()
-            screen.update(choice([' ', '.']) for _ in range(size.x * size.y))
+            for pos in screen.g_pos():
+                tab[pos.x][pos.y] = choice([' ', '.'])
+            str_size = str(screen.get_size())
+            for i, c in enumerate(str_size):
+                tab[i+1][1] = c
+            screen.update(tab)
             time.sleep(0.1)
 
     finally:
         # Pour avoir les erreures à la fin du programme
-        del screen
+        screen.stop()
 
 
 if __name__ == "__main__":

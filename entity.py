@@ -4,10 +4,9 @@
 Définie la classe entity
 Permet de modeliser le personnage et des monstre
 """
-
+from random import choice
 from vect import Vect
 from astar import calc_path_astart
-from random import randint, choice
 
 class Player():
     """
@@ -19,11 +18,11 @@ class Player():
     START_MONEY = 0
     CHAR = '@'
 
-    def __init__(self, x, y):
+    def __init__(self, pos):
         """
         Personnage
         """
-        self.pos = Vect(x, y)
+        self.pos = pos
         self.direction = Vect(1, 0)
         self.distance_view = 7
 

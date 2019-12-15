@@ -30,53 +30,68 @@ class Core:
         Initialisation
         """
         # Matrice de collision onvention : True = libre; False = bloqué
-        self.mat_collide = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        self.mat_collide = None
         # Matrice de vision True = VIsible. False = invisible
-        self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        self.mat_view = None
         # Matrice d'affichage du village
-        self.mat_render = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
-
+        self.mat_render = None
         # Entités
-        self.player = Player(0, 0)
-        self.bullets = []
-        self.monsters = []
-        self.treasure = []
-        self.swords = []
+        self.player = None
+        self.bullets = None
+        self.monsters = None
+        self.treasure = None
+        self.swords = None
         self.sword = None
-
         # COmpteur de update
         # TODO : Compteur dans les classes respectives
-        self.cpt_bullet = 0
-        self.cpt_strike = 0
-        self.cpt_monster = 0
+        self.cpt_bullet = None
+        self.cpt_strike = None
+        self.cpt_monster = None
+        self.generate()
 
         # Tableau d'affichage final
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
-
 
     def generate(self):
         """
         Genere les salles du jeu <=> initialise tab
         """
+        # Generation du village
         village = Village(self._XMAX, self._YMAX, self._NB_ROOMS)
         village.generate()
 
-        self.player.pos = village.rooms[0].p[0] + village.rooms[0].size // 2
+        # Player dans la premiere salle
+        self.player = Player(village.rooms[0].p[0] + village.rooms[0].size // 2)
 
+        # ======================== MATRICES =========================
+        # Matrice de collision onvention : True = libre; False = bloqué
+        self.mat_collide = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # Matrice de vision True = VIsible. False = invisible
+        self.mat_view = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
+        # Matrice d'affichage du village
+        self.mat_render = [[' ' for _ in range(self._YMAX)] for _ in range(self._XMAX)]
         # COLLIDES
         for pos in village.g_xyCollide():
             self.mat_collide[pos.x][pos.y] = True
-
         # RENDER
         for pos, char in village.g_xyRender():
             self.mat_render[pos.x][pos.y] = char
 
+        # ======================== ENTITEES =========================
         #Ajout de coffres (2 max par room) | Monsters
+        self.bullets = []
+        self.monsters = []
+        self.treasure = []
+        self.swords = []
         for room in village.rooms:
             self.monsters.append(Monster(room.newRandomPointInRoom(), 1))
             for _ in range(randint(0, 2)):
                 self.treasure.append(Treasure(room.newRandomPointInRoom(), 5))
 
+        # Cpt
+        self.cpt_bullet = 0
+        self.cpt_strike = 0
+        self.cpt_monster = 0
 
 
     def update(self, events):
@@ -179,6 +194,10 @@ class Core:
         update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
+        # Todo
+        #if self.player.pos == self.end.pos:
+        if self.player.hp == 0:
+            self.generate()
         return self.player.hp >= 0 # Condition d'arret
 
     def render(self, scr_size, g_scr_pos, os_info):
@@ -225,7 +244,8 @@ class Core:
 
         decoration = ['|', '/', '-', '\\']
         bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
-        bot_bat2 = "[{}] Level : 0 | Gold : {} ".format(decoration[self.cpt_monster % 4], self.player.money)
+        bot_bat2 = "[{}] Level : 0 | Gold : {} ".\
+                    format(decoration[self.cpt_monster % 4], self.player.money)
 
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# pylint: disable=C0103
+
 """
 SANDBOX
 """
@@ -53,9 +55,9 @@ def main():
         for y in range(SIZE_Y):
             for x in range(SIZE_X):
                 char = screen[x][SIZE_Y- y-1]
-                if char == False:
+                if char is False:
                     print_char = "\033[0;34;41m" + ' ' + "\033[0m"
-                if char == True:
+                if char is True:
                     print_char = ' '
                 if char == 'F':
                     print_char = "\033[0;34;43m" + ' ' + "\033[0m"

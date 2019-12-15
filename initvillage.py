@@ -174,7 +174,7 @@ def main():
     """
     Test unitaire
     """
-    SIZE_Y = 25
+    SIZE_Y = 50
     SIZE_X = 100
     screen = [[' ' for _ in range(SIZE_Y)] for _ in range(SIZE_X)]
 

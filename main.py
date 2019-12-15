@@ -28,7 +28,6 @@ def main():
         screen = Screen()
         #Coeur du jeu
         core = Core()
-        core.generate()
         # boucle d'evenements
         event_loop = MyEventLoop()
         event_loop.start()
@@ -41,7 +40,7 @@ def main():
         return True
 
     finally:
-        # Attrape erreur
+        # Stop secu
         screen.stop()
 
 

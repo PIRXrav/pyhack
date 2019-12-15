@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
+# pylint: disable=C0103
 """
 Classique A*
 https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
 """
-
+from heapq import heappush, heappop
+import numpy
 from vect import Vect
 
 # Author: Christian Careaga (christian.careaga7@gmail.com)
 # A* Pathfinding in Python (2.7)
-# Please give credit if used
-
-import numpy
-from heapq import *
-
 
 def heuristic(a, b):
+    """
+    heuristic
+    """
     return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
 
 def astar(array, start, goal):
-
-    neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    """
+    A*
+    """
+    neighbors = [(0, 1), (0, -1), (1, 0), (-1, 0),
+                 (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
     close_set = set()
     came_from = {}
@@ -78,16 +81,16 @@ def main():
     """
     TU
     """
-    tab = [ [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+    tab = [[1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
     start = Vect(0, 0)
     end = Vect(7, 6)
