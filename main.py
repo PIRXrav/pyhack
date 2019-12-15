@@ -9,7 +9,6 @@ from core import Core
 from myeventloop import MyEventLoop
 from screen import Screen
 
-
 def main():
     """
     Entry point
@@ -37,9 +36,15 @@ def main():
         timer = Pit(0.1, game_update)
         timer.start()
 
+        screen.stop()
+        print("Votre score : {}$".format(core.player.money))
+        return True
+
     finally:
         # Attrape erreur
-        screen.__del__()
+        screen.stop()
+
+
 
 
 if __name__ == "__main__":

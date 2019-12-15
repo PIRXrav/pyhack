@@ -46,7 +46,7 @@ class Screen:
         # Taille de l'écran
         self.size = Vect(0, 0)
 
-    def __del__(self):
+    def stop(self):
         """
         Remet la console dans l'état initial
         """

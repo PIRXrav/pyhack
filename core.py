@@ -179,7 +179,7 @@ class Core:
         update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
-        return True
+        return self.player.hp >= 0 # Condition d'arret
 
     def render(self, scr_size, g_scr_pos, os_info):
         """
