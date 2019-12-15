@@ -298,6 +298,26 @@ class Sword:
         """
         return self.CHARS_POSS[-self.cpt-1]
 
+class Door:
+    """
+    La porte de sortie
+    """
+    CHARS = ['O', '0', '¤']
+
+    def __init__(self, pos):
+        """
+        Init
+        """
+        self.pos = pos
+        self.cpt = 0
+    def render(self):
+        """
+        Render
+        """
+        self.cpt += 1
+        return "\033[33m" + self.CHARS[self.cpt % len(self.CHARS)] + "\033[0m"
+
+
 def main():
     """
     Test unitaire

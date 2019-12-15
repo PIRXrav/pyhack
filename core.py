@@ -10,7 +10,7 @@ from pynput.keyboard import Key
 
 from initvillage import Village
 from vect import Vect
-from entity import Player, Monster, Treasure
+from entity import Player, Monster, Treasure, Door
 
 class Core:
     """
@@ -23,7 +23,7 @@ class Core:
     _YMAX = 100
     _NB_ROOMS = 20
 
-    RULE_VISION = True
+    RULE_VISION = False
 
     def __init__(self):
         """
@@ -37,20 +37,23 @@ class Core:
         self.mat_render = None
         # Entités
         self.player = None
+        self.door = None
         self.bullets = None
         self.monsters = None
         self.treasure = None
         self.swords = None
-        self.sword = None
         # COmpteur de update
         # TODO : Compteur dans les classes respectives
         self.cpt_bullet = None
         self.cpt_strike = None
         self.cpt_monster = None
-        self.generate()
 
         # Tableau d'affichage final
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
+
+        # Start !
+        self.level = 0
+        self.generate()
 
     def generate(self):
         """
@@ -62,7 +65,7 @@ class Core:
 
         # Player dans la premiere salle
         self.player = Player(village.rooms[0].p[0] + village.rooms[0].size // 2)
-
+        self.door = Door(village.rooms[-1].p[0] + village.rooms[-1].size // 2)
         # ======================== MATRICES =========================
         # Matrice de collision onvention : True = libre; False = bloqué
         self.mat_collide = [[False for _ in range(self._YMAX)] for _ in range(self._XMAX)]
@@ -92,6 +95,8 @@ class Core:
         self.cpt_bullet = 0
         self.cpt_strike = 0
         self.cpt_monster = 0
+
+        self.level += 1
 
 
     def update(self, events):
@@ -194,10 +199,9 @@ class Core:
         update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
-        # Todo
-        #if self.player.pos == self.end.pos:
-        if self.player.hp == 0:
+        if self.player.pos == self.door.pos:
             self.generate()
+
         return self.player.hp >= 0 # Condition d'arret
 
     def render(self, scr_size, g_scr_pos, os_info):
@@ -225,7 +229,8 @@ class Core:
                             self.swords,
                             self.monsters,
                             self.treasure,
-                            [self.player]):
+                            [self.player],
+                            [self.door]):
             scr_pos = mat2scr(entity.pos)
             if isScrPosInScr(scr_pos) \
                 and self.mat_view[entity.pos.x][entity.pos.y] \
@@ -244,8 +249,10 @@ class Core:
 
         decoration = ['|', '/', '-', '\\']
         bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
-        bot_bat2 = "[{}] Level : 0 | Gold : {} ".\
-                    format(decoration[self.cpt_monster % 4], self.player.money)
+        bot_bat2 = "[{}] Level : {} | Gold : {} ".\
+                    format(decoration[self.cpt_monster % 4],
+                           self.level,
+                           self.player.money)
 
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char

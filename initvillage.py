@@ -127,7 +127,7 @@ class Village:
         import sys
         for _ in range(self.NB_ROOMS):
             print(self.addAndConnectNewRoom())
-            sys.stdout.flush()
+            # sys.stdout.flush()
 
     def g_xyRender(self):
         """
