@@ -83,7 +83,6 @@ class Core:
         """
         Met le jeu à jour fc(tous les events)
         """
-
         self.cpt_monster += 1
         self.cpt_bullet += 1
         self.cpt_strike += 1
@@ -180,7 +179,9 @@ class Core:
         update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
-    def render(self, scr_size, g_scr_pos):
+        return True
+
+    def render(self, scr_size, g_scr_pos, os_info):
         """
         retoure un génerateur des caractères à affiche
         suivant l'ordre d'affichage
@@ -217,7 +218,7 @@ class Core:
         self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
 
         # Text
-        top_bar = "{}".format("Town : Koku <> Not safe place ")
+        top_bar = "{}   {}".format("Town : Koku <> Not safe place", os_info)
         for i, char in enumerate(top_bar):
             self.buffer_window[i][scr_size.y - 1] = char
 

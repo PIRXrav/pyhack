@@ -3,32 +3,39 @@
 """
 Main script
 """
-import time
 
-
+from pit import Pit
 from core import Core
 from myeventloop import MyEventLoop
 from screen import Screen
+
 
 def main():
     """
     Entry point
     """
+
+    def game_update(pit_info):
+        """
+        Boucle principale du jeu
+        """
+        if not core.update(event_loop.get()):
+            return False
+        screen.update(core.render(screen.get_size(), screen.g_pos(), pit_info))
+        return True
+
     try:
         # Ecran
         screen = Screen()
         #Coeur du jeu
         core = Core()
         core.generate()
-
         # boucle d'evenements
         event_loop = MyEventLoop()
         event_loop.start()
 
-        while True:
-            core.update(event_loop.get())
-            screen.update(core.render(screen.get_size(), screen.g_pos()))
-            time.sleep(0.03)
+        timer = Pit(0.1, game_update)
+        timer.start()
 
     finally:
         # Attrape erreur
