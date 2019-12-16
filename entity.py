@@ -18,17 +18,26 @@ class Player():
     START_MONEY = 0
     CHAR = '@'
 
-    def __init__(self, pos):
+    def __init__(self):
         """
         Personnage
         """
-        self.pos = pos
+        self.pos = Vect(0, 0)
         self.direction = Vect(1, 0)
         self.distance_view = 7
 
         self.bullet = self.BULLET_MAX
         self.hp = self.HP_MAX
+        self.level = 0
         self.money = self.START_MONEY
+
+    def level_up(self, pos):
+        """
+        Le personnage gagne un level
+        """
+        self.level += 1
+        self.pos = pos
+
 
     def g_case_visible(self, mat_collide):
         """

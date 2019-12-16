@@ -21,7 +21,7 @@ class Core:
     # définition du mat_collide
     _XMAX = 100
     _YMAX = 100
-    _NB_ROOMS = 20
+    _NB_ROOMS = 2
 
     RULE_VISION = False
 
@@ -36,7 +36,7 @@ class Core:
         # Matrice d'affichage du village
         self.mat_render = None
         # Entités
-        self.player = None
+        self.player = Player()
         self.door = None
         self.bullets = None
         self.monsters = None
@@ -52,7 +52,6 @@ class Core:
         self.buffer_window = [[None for _ in range(500)] for _ in range(500)]
 
         # Start !
-        self.level = 0
         self.generate()
 
     def generate(self):
@@ -64,7 +63,7 @@ class Core:
         village.generate()
 
         # Player dans la premiere salle
-        self.player = Player(village.rooms[0].p[0] + village.rooms[0].size // 2)
+        self.player.level_up(village.rooms[0].p[0] + village.rooms[0].size // 2)
         self.door = Door(village.rooms[-1].p[0] + village.rooms[-1].size // 2)
         # ======================== MATRICES =========================
         # Matrice de collision onvention : True = libre; False = bloqué
@@ -96,7 +95,7 @@ class Core:
         self.cpt_strike = 0
         self.cpt_monster = 0
 
-        self.level += 1
+
 
 
     def update(self, events):
@@ -251,7 +250,7 @@ class Core:
         bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
         bot_bat2 = "[{}] Level : {} | Gold : {} ".\
                     format(decoration[self.cpt_monster % 4],
-                           self.level,
+                           self.player.level,
                            self.player.money)
 
         for i, char in enumerate(bot_bat1):
