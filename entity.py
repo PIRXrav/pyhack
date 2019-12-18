@@ -31,6 +31,8 @@ class Player():
         self.hp = self.HP_MAX
         self.level = 0
         self.money = self.START_MONEY
+        self.sword_damage = 1
+        self.gun_damage = 2
 
     def level_up(self, pos):
         """
@@ -64,13 +66,13 @@ class Player():
         Tire une nouvelle balle
         """
         self.bullet -= 1
-        return Bullet(self.pos, self.direction, 42)
+        return Bullet(self.pos, self.direction, self.gun_damage)
 
     def strike(self, mat_collide):
         """
         Donne un coup d'épée
         """
-        return Sword(self.pos + self.direction)
+        return Sword(self.pos + self.direction, self.sword_damage)
 
     def add_money(self, value):
         """
@@ -159,7 +161,7 @@ class Bullet:
         """
         self.pos = pos
         self.direction = directions
-        self.dammage = 2
+        self.dammage = dammage
 
     def update(self, mat_collide):
         """
@@ -190,13 +192,13 @@ class Monster:
     DECOMPOSITION = 2
     SHOCKED = 3
 
-    def __init__(self, pos, dammage):
+    def __init__(self, pos, dammage, health):
         """
         Personnage
         """
         self.pos = pos
         self.dammage = dammage
-        self.health = 2
+        self.health = health
 
         self.shocked = 0
         self.state = self.IDLE
@@ -266,6 +268,8 @@ class Treasure:
     HEART = 0
     BULLET = 1
     GOLD = 2
+    STRENGH = 3
+    POWER = 4
     CHARS = [C_HEART, C_BULLET_CHRG, C_MONEY]
 
     def __init__(self, pos, value):
@@ -273,14 +277,27 @@ class Treasure:
         Init
         """
         self.pos = pos
-        self.object = choice([self.HEART, self.BULLET, self.GOLD])
+        if value == 1:
+            self.object = choice([self.HEART, self.BULLET, self.GOLD])
+        else:
+            self.cpt = -1
+            if value == 2:
+                self.object = self.STRENGH
+            else:
+                self.object = self.POWER
         self.value = value
 
     def render(self):
         """
         Render
         """
-        return self.CHARS[self.object]
+        if self.value == 1:
+            return self.CHARS[self.object]
+        else:
+            self.cpt += 1
+            if self.value == 2:
+                return C_TRE_WEAPON[self.cpt % len(C_TRE_WEAPON)]
+        return C_TRE_GUN[self.cpt % len(C_TRE_GUN)]
 
     def get_value(self):
         """
@@ -295,11 +312,11 @@ class Sword:
     """
     DELTA_POSS = list(Vect(0, 0).g_rect(Vect(1, 1)))
 
-    def __init__(self, pos):
+    def __init__(self, pos, dammage):
 
         self.pos = pos
         self.cpt = len(self.DELTA_POSS)-1
-        self.dammage = 1
+        self.dammage = dammage
 
     def update(self, mat_collide, player_pos):
         """

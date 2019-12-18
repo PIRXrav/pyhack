@@ -19,11 +19,11 @@ class Core:
         * l' update
     """
     # définition du mat_collide
-    _XMAX = 100
-    _YMAX = 100
-    _NB_ROOMS = 20
+    _XMAX = 50
+    _YMAX = 50
+    _NB_ROOMS = 3
 
-    RULE_VISION = False
+    RULE_VISION = True
 
     def __init__(self):
         """
@@ -87,17 +87,22 @@ class Core:
         self.swords = []
         for i, room in enumerate(village.rooms):
             if i != 0:
-                self.monsters.append(Monster(room.newRandomPointInRoom(), 1))
-            for _ in range(randint(0, 2)):
-                self.treasure.append(Treasure(room.newRandomPointInRoom(),
-                                              randint(1, 3)))
+                self.monsters.append(Monster(room.newRandomPointInRoom(),\
+                1 + self.player.level // 3, 1 + self.player.level))
+            if i == 2 * self._NB_ROOMS // 3:
+                self.treasure.append(Treasure(room.newRandomPointInRoom(), 2))
+            elif i == self._NB_ROOMS // 3:
+                self.treasure.append(Treasure(room.newRandomPointInRoom(), 3))
+            else:
+                for _ in range(randint(0, 2)):
+                    self.treasure.append(Treasure(room.newRandomPointInRoom(), 1))
 
         # Cpt
         self.cpt_bullet = 0
         self.cpt_strike = 0
         self.cpt_monster = 0
 
-
+        self.monster_life = self.monsters[0].health
 
 
     def update(self, events):
@@ -196,6 +201,12 @@ class Core:
                     elif self.treasure[i].object == Treasure.GOLD:
                         self.player.add_money(self.treasure[i].value)
                         self.treasure.pop(i)
+                    elif self.treasure[i].object == Treasure.STRENGH:
+                        self.player.sword_damage += 1
+                        self.treasure.pop(i)
+                    elif self.treasure[i].object == Treasure.POWER:
+                        self.player.gun_damage += 1
+                        self.treasure.pop(i)
 
         update_player()     # Actualise le depl / tirs / vision
         update_monsters()   # Actualise les monstres : enleve HP
@@ -253,10 +264,13 @@ class Core:
 
         decoration = ['|', '/', '-', '\\']
         bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
-        bot_bat2 = "[{}] Level : {} | Gold : {} ".\
+        bot_bat2 = "[{}] Level : {} | Gold : {} | epee : {} | arme : {} | vie monstre : {}".\
                     format(decoration[self.cpt_monster % 4],
                            self.player.level,
-                           self.player.money)
+                           self.player.money,
+                           self.player.sword_damage,
+                           self.player.gun_damage,
+                           self.monster_life)
 
         for i, char in enumerate(bot_bat1):
             self.buffer_window[i][1] = char
