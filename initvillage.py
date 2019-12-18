@@ -5,6 +5,7 @@ Définie la classe Village
 Un village est un tableau de pièce
 """
 
+from chars import *
 from initroom import Room
 
 class Village:
@@ -136,7 +137,7 @@ class Village:
         Permet la création de matrice d'affichage
         """
         for room in self.rooms:
-            for pos, char in room.g_xyRender('.'):
+            for pos, char in room.g_xyRender(C_ROOM_INSIDE):
                 yield (pos, char)
 
         for path in self.paths:
@@ -144,13 +145,13 @@ class Village:
             for index, pos in enumerate(path):
                 if index == 0:
                     # Porte de depart
-                    yield (pos, "\033[33m" + 'D' + "\033[0m")
+                    yield (pos, C_VILLAGE_PATH_DOOR)
                 elif index == index_max:
                     # Porte d'arrivé
-                    yield (pos, "\033[33m" + '\u25A1' + "\033[0m")
+                    yield (pos, C_VILLAGE_PATH_DOOR)
                 else:
                     # Chemin
-                    yield (pos, "\033[33m" + '\u2591' + "\033[0m")
+                    yield (pos, C_VILLAGE_PATH)
 
     def g_xyCollide(self):
         """

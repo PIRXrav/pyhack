@@ -8,6 +8,8 @@ from random import choice
 from vect import Vect
 from astar import calc_path_astart
 
+from chars import *
+
 class Player():
     """
     Classe Player :
@@ -16,7 +18,6 @@ class Player():
     BULLET_MAX = 10
     HP_MAX = 10
     START_MONEY = 0
-    CHAR = '@'
 
     def __init__(self):
         """
@@ -133,7 +134,7 @@ class Player():
         """
         Retourne le char à afficher
         """
-        return self.CHAR
+        return C_PLAYER
 
     def __str__(self):
         """
@@ -152,8 +153,6 @@ class Bullet:
     """
     Classe Bullet :
     """
-    CHARS = ['>', '/', '^', '\\', '<', '/', 'v', '\\']
-
     def __init__(self, pos, directions, dammage):
         """
         Personnage
@@ -174,7 +173,7 @@ class Bullet:
         """
         Retourne le char à afficher
         """
-        return self.CHARS[int(self.direction.angle()/2/3.1415 * 8)]
+        return C_BULLETS[int(self.direction.angle()/2/3.1415 * 8)]
 
     def __str__(self):
         return "(*:{})".format(self.pos)
@@ -202,9 +201,6 @@ class Monster:
         self.shocked = 0
         self.state = self.IDLE
         self.ttd = 8 # TIme to die
-        self.chars = ["\033[33m" + 'X' + "\033[0m",
-                      "\033[35m" + 'X' + "\033[0m",
-                      'X']
         # TEMP
         # Le chemin du monstre au joueur
         self.path = []
@@ -230,6 +226,9 @@ class Monster:
                 self.path = calc_path_astart(mat_collide, self.pos, player_pos)
                 if self.path != []:
                     self.pos = self.path[0]
+            if self.state == self.IDLE:
+                # TODO: Depl aléatoire
+                pass
             return False
 
         self.ttd -= 1
@@ -241,7 +240,7 @@ class Monster:
         """
         if self.state == self.RUN:
             return "\033[31m" + 'X' + "\033[0m"
-        return self.chars[self.ttd % len(self.chars)]
+        return C_MONSTERS[self.ttd % len(C_MONSTERS)]
 
     def kill(self):
         """
@@ -267,7 +266,7 @@ class Treasure:
     HEART = 0
     BULLET = 1
     GOLD = 2
-    CHARS = ['\u2665', '\u25B2', '$']
+    CHARS = [C_HEART, C_BULLET_CHRG, C_MONEY]
 
     def __init__(self, pos, value):
         """
@@ -295,12 +294,10 @@ class Sword:
     coup d'épée venant du joueur
     """
     DELTA_POSS = list(Vect(0, 0).g_rect(Vect(1, 1)))
-    CHARS_POSS = HARS = ['-', '/', '|', '\\', '-', '/', '|', '\\']
 
     def __init__(self, pos):
 
         self.pos = pos
-        self.char = '\u25A0'
         self.cpt = len(self.DELTA_POSS)-1
         self.dammage = 1
 
@@ -320,13 +317,12 @@ class Sword:
         """
         render
         """
-        return self.CHARS_POSS[-self.cpt-1]
+        return C_SWORDS[- self.cpt % len(C_SWORDS)]
 
 class Door:
     """
     La porte de sortie
     """
-    CHARS = ['O', '0', '¤']
 
     def __init__(self, pos):
         """
@@ -339,7 +335,7 @@ class Door:
         Render
         """
         self.cpt += 1
-        return "\033[33m" + self.CHARS[self.cpt % len(self.CHARS)] + "\033[0m"
+        return C_DOORS[self.cpt % len(C_DOORS)]
 
 
 def main():
