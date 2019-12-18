@@ -21,7 +21,7 @@ class Core:
     # définition du mat_collide
     _XMAX = 100
     _YMAX = 100
-    _NB_ROOMS = 2
+    _NB_ROOMS = 20
 
     RULE_VISION = False
 
@@ -85,10 +85,12 @@ class Core:
         self.monsters = []
         self.treasure = []
         self.swords = []
-        for room in village.rooms:
-            self.monsters.append(Monster(room.newRandomPointInRoom(), 1))
+        for i, room in enumerate(village.rooms):
+            if i != 0:
+                self.monsters.append(Monster(room.newRandomPointInRoom(), 1))
             for _ in range(randint(0, 2)):
-                self.treasure.append(Treasure(room.newRandomPointInRoom(), 5))
+                self.treasure.append(Treasure(room.newRandomPointInRoom(),
+                                              randint(1, 3)))
 
         # Cpt
         self.cpt_bullet = 0
@@ -139,7 +141,6 @@ class Core:
                 if not self.bullets[i].update(self.mat_collide):
                     self.bullets.pop(i)
                 else:
-                    # TODO: BUG here ?
                     for i_monster in range(len(self.monsters)-1, -1, -1):
                         if self.bullets[i].pos == self.monsters[i_monster].pos:
                             self.monsters[i_monster].kill()
@@ -193,9 +194,9 @@ class Core:
                         self.treasure.pop(i)
 
         update_player()     # Actualise le depl / tirs / vision
+        update_monsters()   # Actualise les monstres : enleve HP
         update_bullets()    # Actualise toutes les balles : kill monsters
         update_sword()      # Actualise le coup d'épee
-        update_monsters()   # Actualise les monstres : enleve HP
         update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
         if self.player.pos == self.door.pos:
