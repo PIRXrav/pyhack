@@ -160,7 +160,7 @@ class Bullet:
         """
         self.pos = pos
         self.direction = directions
-        self.dammage = dammage
+        self.dammage = 2
 
     def update(self, mat_collide):
         """
@@ -189,6 +189,7 @@ class Monster:
     IDLE = 0
     RUN = 1
     DECOMPOSITION = 2
+    SHOCKED = 3
 
     def __init__(self, pos, dammage):
         """
@@ -196,8 +197,9 @@ class Monster:
         """
         self.pos = pos
         self.dammage = dammage
+        self.health = 2
 
-
+        self.shocked = 0
         self.state = self.IDLE
         self.ttd = 8 # TIme to die
         self.chars = ["\033[33m" + 'X' + "\033[0m",
@@ -211,6 +213,13 @@ class Monster:
         """
         Met à jour l'enemie
         """
+        if self.state == self.SHOCKED:
+            if self.shocked:
+                self.shocked -= 1
+            else:
+                self.state = self.IDLE
+            return False
+
         if self.state == self.IDLE or self.state == self.RUN:
             if self.pos.distance(player_pos) <= 10:
                 self.state = self.RUN
@@ -230,13 +239,19 @@ class Monster:
         """
         Retourne le char à afficher
         """
+        if self.state == self.RUN:
+            return "\033[31m" + 'X' + "\033[0m"
         return self.chars[self.ttd % len(self.chars)]
 
     def kill(self):
         """
         Elimine le mechant
         """
-        self.state = self.DECOMPOSITION
+        if self.health <= 0:
+            self.state = self.DECOMPOSITION
+        else:
+            self.state = self.SHOCKED
+            self.shocked = 4
 
     def __str__(self):
         return "(*:{})".format(self.pos)
@@ -287,7 +302,7 @@ class Sword:
         self.pos = pos
         self.char = '\u25A0'
         self.cpt = len(self.DELTA_POSS)-1
-
+        self.dammage = 1
 
     def update(self, mat_collide, player_pos):
         """

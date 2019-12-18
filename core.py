@@ -85,7 +85,7 @@ class Core:
         self.monsters = []
         self.treasure = []
         self.swords = []
-        for room in village.rooms:
+        for room in village.rooms[1:]:
             self.monsters.append(Monster(room.newRandomPointInRoom(), 1))
             for _ in range(randint(0, 2)):
                 self.treasure.append(Treasure(room.newRandomPointInRoom(), 5))
@@ -141,14 +141,17 @@ class Core:
                 else:
                     # TODO: BUG here ?
                     for i_monster in range(len(self.monsters)-1, -1, -1):
-                        if self.bullets[i].pos == self.monsters[i_monster].pos:
+                        if self.bullets[i].pos == self.monsters[i_monster].pos \
+                        or self.bullets[i].pos + self.bullets[i].direction == \
+                        self.monsters[i_monster].pos:
+                            self.monsters[i_monster].health -= self.bullets[i].dammage
                             self.monsters[i_monster].kill()
                             self.bullets.pop(i)
                             break
 
         def update_sword():
             """²
-            Mise à jout de l'épée
+            Mise à jour de l'épée
             """
             for i in range(len(self.swords)-1, -1, -1):
                 if self.swords[i].update(self.mat_collide, self.player.pos):
@@ -156,6 +159,7 @@ class Core:
                 else:
                     for i_monster in range(len(self.monsters)-1, -1, -1):
                         if self.swords[i].pos == self.monsters[i_monster].pos:
+                            self.monsters[i_monster].health -= self.swords[i].dammage
                             self.monsters[i_monster].kill()
                             break
 
