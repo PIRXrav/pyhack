@@ -142,14 +142,9 @@ class Player():
         """
         Retourne une chaine d'affichage
         """
-        heal_str = '[{}]'.format('\u2665' * int(self.hp / self.HP_MAX * 10)
-                                 + " "* (10-int(self.hp / self.HP_MAX * 10)))
-        bullet_str = '[{}]'.format('|' * (self.bullet)
-                                   + " " * (self.BULLET_MAX - self.bullet))
-
-        return 'Position : {} | HP : {} | Bullets {}'.format(
-            self.pos, heal_str, bullet_str
-        )
+        heal_str = '\u2665' * int(self.hp / self.HP_MAX * 10) +  ' ' * (10-int(self.hp / self.HP_MAX * 10))
+        bullet_str = '|' * int(self.bullet) + ' ' * int(self.BULLET_MAX - self.bullet)
+        return 'Position : {} | HP : [' + heal_str + '] | Bullets [' + bullet_str + ']'
 
 class Bullet:
     """
@@ -241,7 +236,7 @@ class Monster:
         Retourne le char à afficher
         """
         if self.state == self.RUN:
-            return "\033[31m" + 'X' + "\033[0m"
+            return C_MONSTER_RUN
         return C_MONSTERS[self.ttd % len(C_MONSTERS)]
 
     def kill(self):

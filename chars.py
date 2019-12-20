@@ -51,26 +51,29 @@ CWHITEBG2   = '\33[107m'
 # ===================================== ENTITY ========================================
 
 # Treasure
-C_HEART = CRED + '\u2665' + CEND # <3
-C_BULLET_CHRG = CYELLOW + '\u25B2' + CEND   # Triangle plein
-C_MONEY =  CYELLOW + '$' + CEND   # $
+C_HEART = CRED + CBOLD + '\u2665' + CEND # <3
+C_BULLET_CHRG = CYELLOW + CBOLD + '\u25B2' + CEND   # Triangle plein
+C_MONEY =  CYELLOW + CBOLD + '$' + CEND   # $
+
+C_TRE_WEAPON = ['\u272D', '\u272E', '\u272F']
+C_TRE_GUN = ['\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685']
 
 # Bullets
 C_BULLET_COLOR = CYELLOW
-C_BULLETS = [C_BULLET_COLOR + '>' + CEND,
-             C_BULLET_COLOR + '/' + CEND,
-             C_BULLET_COLOR + '^' + CEND,
-             C_BULLET_COLOR + '\\' + CEND,
-             C_BULLET_COLOR + '<' + CEND,
-             C_BULLET_COLOR + '/' + CEND,
-             C_BULLET_COLOR + 'v' + CEND,
-             C_BULLET_COLOR + '\\' + CEND]
+C_BULLETS = [C_BULLET_COLOR + CBOLD + '>' + CEND,
+             C_BULLET_COLOR + CBOLD + '/' + CEND,
+             C_BULLET_COLOR + CBOLD + '^' + CEND,
+             C_BULLET_COLOR + CBOLD + '\\' + CEND,
+             C_BULLET_COLOR + CBOLD + '<' + CEND,
+             C_BULLET_COLOR + CBOLD + '/' + CEND,
+             C_BULLET_COLOR + CBOLD + 'v' + CEND,
+             C_BULLET_COLOR + CBOLD + '\\' + CEND]
 # swords
 C_SWORD_COLOR = CYELLOW
-C_SWORDS = [C_SWORD_COLOR + '-' + CEND,
-            C_SWORD_COLOR + '/' + CEND,
-            C_SWORD_COLOR + '|' + CEND,
-            C_SWORD_COLOR + '\\' + CEND]
+C_SWORDS = [C_SWORD_COLOR + CBOLD + '-' + CEND,
+            C_SWORD_COLOR + CBOLD + '/' + CEND,
+            C_SWORD_COLOR + CBOLD + '|' + CEND,
+            C_SWORD_COLOR + CBOLD + '\\' + CEND]
 # Entity door
 C_DOOR_COLOR = CBLUE
 C_DOORS = [C_DOOR_COLOR + '\u2599' + CEND,
@@ -79,20 +82,21 @@ C_DOORS = [C_DOOR_COLOR + '\u2599' + CEND,
            C_DOOR_COLOR + '\u259F' + CEND]
 
 # Monsters
-C_MONSTERS = [CRED     + 'X' + CEND,
-              CVIOLET2 + 'X' + CEND,
-              'X']
+C_MONSTERS = [CRED     + CBOLD + 'X' + CEND,
+              CVIOLET2 + CBOLD + 'X' + CEND,
+              CBOLD + 'X' + CEND]
+C_MONSTER_RUN = CRED + CBOLD + 'X' + CEND
 
 # Player
-C_PLAYER = '@'
-
-#Treasure
-C_TRE_WEAPON = ['\u272D', '\u272E', '\u272F']
-C_TRE_GUN = ['\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685']
+C_PLAYER = CBOLD + '@' + CEND
 
 # ===================================== VILLAGE ========================================
 
-C_VILLAGE_PATH = "\033[33m" + '\u2591' + "\033[0m"
-C_VILLAGE_PATH_DOOR = "\033[33m" + '\u25A1' + "\033[0m"
+C_VILLAGE_PATH = CVIOLET + '\u2591' + CEND
+C_VILLAGE_PATH_DOOR = CYELLOW + CBOLD + '\u25A1' + CEND
 
 C_ROOM_INSIDE = '.'
+
+# ===================================== PAUSE ==========================================
+C_PAUSE_BORDER = CGREYBG + ' ' + CEND
+C_PAUSE_FILL = '.'

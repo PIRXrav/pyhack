@@ -19,11 +19,11 @@ class Core:
         * l' update
     """
     # définition du mat_collide
-    _XMAX = 50
-    _YMAX = 50
-    _NB_ROOMS = 3
+    _XMAX = 200
+    _YMAX = 150
+    _NB_ROOMS = 20
 
-    RULE_VISION = True
+    RULE_VISION = False
 
     GAME_STATE_RUN = True
     GAME_STATE_MENU = False
@@ -58,6 +58,7 @@ class Core:
         self.generate()
 
         self.game_state = self.GAME_STATE_RUN
+        self.timer_state = 0
 
     def generate(self):
         """
@@ -213,8 +214,10 @@ class Core:
                         self.player.gun_damage += 1
                         self.treasure.pop(i)
 
+        self.timer_state += 1
 
-        if Key.esc in events:
+        if Key.esc in events and self.timer_state >= 4:
+            self.timer_state = 0
             self.game_state = not self.game_state
 
 
@@ -230,6 +233,7 @@ class Core:
 
         if self.game_state == self.GAME_STATE_MENU:
             return True
+
     def render(self, scr_size, g_scr_pos, os_info):
         """
         retoure un tableau des caractères à affiche
@@ -301,13 +305,26 @@ class Core:
             """
             Render state = menu
             """
-            for scr in g_scr_pos:
-                self.buffer_window[scr.x][scr.y] = 'X'
+            # for scr in g_scr_pos:
+            #    self.buffer_window[scr.x][scr.y] = ' '
+
+            scr_center = scr_size // 2
+            box_cote = Vect(scr_size.x // 4, scr_size.y // 8)
+            for pos in scr_center.g_rect(box_cote):
+                self.buffer_window[pos.x][pos.y] = C_PAUSE_BORDER
+            for pos in scr_center.g_rect_fill_no_border(box_cote):
+                self.buffer_window[pos.x][pos.y] = C_PAUSE_FILL
+
+
+            texte = "PAUSE"
+            for i, char in enumerate(texte):
+                self.buffer_window[scr_center.x - len(texte)//2 + i][scr_center.y] = char
 
 
         if self.game_state == self.GAME_STATE_RUN:
             render_run()
         if self.game_state == self.GAME_STATE_MENU:
+            render_run()
             render_menu()
 
         return self.buffer_window

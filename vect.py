@@ -230,6 +230,16 @@ class Vect():
             pos += Vect(1, 0)
             yield pos
 
+    def g_rect_fill_no_border(self, cote):
+        """
+        Retourne un generateur sur tous les points formant
+        le contour du rectangle ou self est le centre
+        (Croisement des diagonales)
+        """
+        for dx in range(-cote.x + 1, cote.x - 1 + 1):
+            for dy in range(-cote.y + 1, cote.y - 1 + 1):
+                yield self + Vect(dx, dy)
+
 
 def tu():
     """
