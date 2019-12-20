@@ -11,7 +11,7 @@ from pynput.keyboard import Key
 from initvillage import Village
 from vect import Vect
 from entity import Player, Monster, Treasure, Door
-
+from chars import *
 class Core:
     """
     Cette classe contient tout le coeur du jeu
@@ -24,6 +24,9 @@ class Core:
     _NB_ROOMS = 3
 
     RULE_VISION = True
+
+    GAME_STATE_RUN = True
+    GAME_STATE_MENU = False
 
     def __init__(self):
         """
@@ -53,6 +56,8 @@ class Core:
 
         # Start !
         self.generate()
+
+        self.game_state = self.GAME_STATE_RUN
 
     def generate(self):
         """
@@ -208,79 +213,101 @@ class Core:
                         self.player.gun_damage += 1
                         self.treasure.pop(i)
 
-        update_player()     # Actualise le depl / tirs / vision
-        update_monsters()   # Actualise les monstres : enleve HP
-        update_bullets()    # Actualise toutes les balles : kill monsters
-        update_sword()      # Actualise le coup d'épee
-        update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
 
-        if self.player.pos == self.door.pos:
-            self.generate()
+        if Key.esc in events:
+            self.game_state = not self.game_state
 
-        return self.player.hp >= 0 # Condition d'arret
 
+        if self.game_state == self.GAME_STATE_RUN:
+            update_player()     # Actualise le depl / tirs / vision
+            update_monsters()   # Actualise les monstres : enleve HP
+            update_bullets()    # Actualise toutes les balles : kill monsters
+            update_sword()      # Actualise le coup d'épee
+            update_treasures()  # Actualise les coffres : Ajoute <3 / Balles / $
+            if self.player.pos == self.door.pos:
+                self.generate()
+            return self.player.hp >= 0 # Condition d'arret
+
+        if self.game_state == self.GAME_STATE_MENU:
+            return True
     def render(self, scr_size, g_scr_pos, os_info):
         """
-        retoure un génerateur des caractères à affiche
+        retoure un tableau des caractères à affiche
         suivant l'ordre d'affichage
         fc(vision, rendu, objets)
         """
-        scr2mat = lambda scr_pos: scr_pos + self.player.pos - scr_size // 2
-        mat2scr = lambda mat_pos: mat_pos - self.player.pos + scr_size // 2
-        isScrPosInScr = lambda scr_pos: Vect(0, 0) <= scr_pos < scr_size
 
-        # Rendu du fond
-        for scr in g_scr_pos:
-            mat_pos = scr2mat(scr)
-            # Dans matrice et Visible
-            if Vect(0, 0) <= mat_pos < Vect(self._XMAX, self._YMAX) and \
-                (self.mat_view[mat_pos.x][mat_pos.y] or self.RULE_VISION):
-                self.buffer_window[scr.x][scr.y] = self.mat_render[mat_pos.x][mat_pos.y]
-            else:
-                self.buffer_window[scr.x][scr.y] = ' '
+        def render_run():
+            """
+            Render state = run
+            """
+            scr2mat = lambda scr_pos: scr_pos + self.player.pos - scr_size // 2
+            mat2scr = lambda mat_pos: mat_pos - self.player.pos + scr_size // 2
+            isScrPosInScr = lambda scr_pos: Vect(0, 0) <= scr_pos < scr_size
 
-        # Rendu des entitées
-        for entity in chain(self.bullets,
-                            self.swords,
-                            self.monsters,
-                            self.treasure,
-                            [self.player],
-                            [self.door]):
-            scr_pos = mat2scr(entity.pos)
-            if isScrPosInScr(scr_pos) \
-                and self.mat_view[entity.pos.x][entity.pos.y] \
-                or self.RULE_VISION:
-                self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
+            # Rendu du fond
+            for scr in g_scr_pos:
+                mat_pos = scr2mat(scr)
+                # Dans matrice et Visible
+                if Vect(0, 0) <= mat_pos < Vect(self._XMAX, self._YMAX) and \
+                    (self.mat_view[mat_pos.x][mat_pos.y] or self.RULE_VISION):
+                    self.buffer_window[scr.x][scr.y] = self.mat_render[mat_pos.x][mat_pos.y]
+                else:
+                    self.buffer_window[scr.x][scr.y] = ' '
 
-        # Rendu du joueur
-        scr_pos = mat2scr(self.player.pos)
-        self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
+            # Rendu des entitées
+            for entity in chain(self.bullets,
+                                self.swords,
+                                self.monsters,
+                                self.treasure,
+                                [self.player],
+                                [self.door]):
+                scr_pos = mat2scr(entity.pos)
+                if isScrPosInScr(scr_pos) \
+                    and self.mat_view[entity.pos.x][entity.pos.y] \
+                    or self.RULE_VISION:
+                    self.buffer_window[scr_pos.x][scr_pos.y] = entity.render()
 
-        # Text
-        top_bar = "{}   {}".format("Town : Koku <> Not safe place", os_info)
-        for i, char in enumerate(top_bar):
-            self.buffer_window[i][scr_size.y - 1] = char
+            # Rendu du joueur
+            scr_pos = mat2scr(self.player.pos)
+            self.buffer_window[scr_pos.x][scr_pos.y] = self.player.render()
 
-
-        decoration = ['|', '/', '-', '\\']
-        bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
-        bot_bat2 = "[{}] Level : {} | Gold : {} | epee : {} | arme : {} | vie monstre : {}".\
-                    format(decoration[self.cpt_monster % 4],
-                           self.player.level,
-                           self.player.money,
-                           self.player.sword_damage,
-                           self.player.gun_damage,
-                           self.monster_life)
-
-        for i, char in enumerate(bot_bat1):
-            self.buffer_window[i][1] = char
-        for i, char in enumerate(bot_bat2):
-            self.buffer_window[i][2] = char
-        # Bousolle
-        for y, chars in enumerate(["   N   ", "   ^   ", "W<-o->E", "   v   ", "   S   "]):
-            for x, char in enumerate(chars):
-                self.buffer_window[scr_size.x - 7 + x][5 - y] = char
+            # Text
+            top_bar = "{}   {}".format("Town : Koku <> Not safe place", os_info)
+            for i, char in enumerate(top_bar):
+                self.buffer_window[i][scr_size.y - 1] = char
 
 
+            decoration = ['|', '/', '-', '\\']
+            bot_bat1 = "{} | Monsters : {}".format(self.player, len(self.monsters))
+            bot_bat2 = "[{}] Level : {} | Gold : {} | epee : {} | arme : {} | vie monstre : {}".\
+                        format(decoration[self.cpt_monster % 4],
+                               self.player.level,
+                               self.player.money,
+                               self.player.sword_damage,
+                               self.player.gun_damage,
+                               self.monster_life)
+
+            for i, char in enumerate(bot_bat1):
+                self.buffer_window[i][1] = char
+            for i, char in enumerate(bot_bat2):
+                self.buffer_window[i][2] = char
+            # Bousolle
+            for y, chars in enumerate(["   N   ", "   ^   ", "W<-o->E", "   v   ", "   S   "]):
+                for x, char in enumerate(chars):
+                    self.buffer_window[scr_size.x - 7 + x][5 - y] = char
+
+        def render_menu():
+            """
+            Render state = menu
+            """
+            for scr in g_scr_pos:
+                self.buffer_window[scr.x][scr.y] = 'X'
+
+
+        if self.game_state == self.GAME_STATE_RUN:
+            render_run()
+        if self.game_state == self.GAME_STATE_MENU:
+            render_menu()
 
         return self.buffer_window
