@@ -96,6 +96,7 @@ def main():
     end = Vect(7, 6)
 
     path = calc_path_astart(tab, start, end)
+    assert len(path), 'erreur A*'
     print(path)
 
 

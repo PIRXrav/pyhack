@@ -170,7 +170,7 @@ class Room():
 
 
 
-def tu():
+def main():
     """
     Test unitaire
     """
@@ -214,6 +214,7 @@ def tu():
         screen[pos.x][pos.y] = '#'
 
     for y in range(SIZE_Y):
+
         for x in range(SIZE_X):
             print(screen[x][SIZE_Y- y-1], end='')
         print("")
@@ -231,10 +232,8 @@ def tu():
 
 
 if __name__ == '__main__':
-    N = 10000
+    N = 10
     print(chr(27) + "[2J")
     for i in range(N):
-        print("\033[0;0H  {}/{}".format(i+1, N))
-        tu()
+        main()
         print()
-        input()

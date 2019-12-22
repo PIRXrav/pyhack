@@ -241,7 +241,7 @@ class Vect():
                 yield self + Vect(dx, dy)
 
 
-def tu():
+def main():
     """
     Test unitaire
     """
@@ -266,5 +266,6 @@ def tu():
     # Str
     print(v0, "<=", vr, "<=", v10)
     print("OK")
+
 if __name__ == '__main__':
-    tu()
+    main()
