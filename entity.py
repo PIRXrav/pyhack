@@ -7,8 +7,8 @@ Permet de modeliser le personnage et des monstre
 from random import choice
 from vect import Vect
 from astar import calc_path_astart
+import chars
 
-from chars import *
 
 class Player():
     """
@@ -41,7 +41,6 @@ class Player():
         self.level += 1
         self.pos = pos
 
-
     def g_case_visible(self, mat_collide):
         """
         retourne sur toutes les cases visibles
@@ -54,7 +53,8 @@ class Player():
             for pos in self.pos.g_bresenham_line(bordure_pos):
                 if self.pos.distance(pos) >= self.distance_view:
                     break
-                if not Vect(0, 0) <= pos < Vect(len(mat_collide), len(mat_collide[0])):
+                if not Vect(0, 0) <= pos < Vect(len(mat_collide),
+                                                len(mat_collide[0])):
                     break
                 if not mat_collide[pos.x][pos.y]:
                     yield pos
@@ -136,20 +136,27 @@ class Player():
         """
         Retourne le char à afficher
         """
-        return C_PLAYER
+        return chars.C_PLAYER
 
     def __str__(self):
         """
         Retourne une chaine d'affichage
         """
-        heal_str = '\u2665' * int(self.hp / self.HP_MAX * 10) +  ' ' * (10-int(self.hp / self.HP_MAX * 10))
-        bullet_str = '|' * int(self.bullet) + ' ' * int(self.BULLET_MAX - self.bullet)
-        return 'Position : {} | HP : [' + heal_str + '] | Bullets [' + bullet_str + ']'
+        heal_str = ('\u2665' * int(self.hp / self.HP_MAX * 10)
+                    + ' ' * (10-int(self.hp / self.HP_MAX * 10)))
+        bullet_str = ('|' * int(self.bullet)
+                      + ' ' * int(self.BULLET_MAX - self.bullet))
+        return ('Position : {} | HP : ['
+                + heal_str
+                + '] | Bullets ['
+                + bullet_str + ']')
+
 
 class Bullet:
     """
     Classe Bullet :
     """
+
     def __init__(self, pos, directions, dammage):
         """
         Personnage
@@ -170,17 +177,15 @@ class Bullet:
         """
         Retourne le char à afficher
         """
-        return C_BULLETS[int(self.direction.angle()/2/3.1415 * 8)]
+        return chars.C_BULLETS[int(self.direction.angle()/2/3.1415 * 8)]
 
     def __str__(self):
         return "(*:{})".format(self.pos)
 
+
 class Monster:
     """
-    Classe Bullet :
-    """
-    """
-    Etat du personnage
+    Monster
     """
     IDLE = 0
     RUN = 1
@@ -197,7 +202,7 @@ class Monster:
 
         self.shocked = 0
         self.state = self.IDLE
-        self.ttd = 8 # TIme to die
+        self.ttd = 8  # TIme to die
         # TEMP
         # Le chemin du monstre au joueur
         self.path = []
@@ -229,15 +234,15 @@ class Monster:
             return False
 
         self.ttd -= 1
-        return self.ttd == 0 # Mort
+        return self.ttd == 0  # Mort
 
     def render(self):
         """
         Retourne le char à afficher
         """
         if self.state == self.RUN:
-            return C_MONSTER_RUN
-        return C_MONSTERS[self.ttd % len(C_MONSTERS)]
+            return chars.C_MONSTER_RUN
+        return chars.C_MONSTERS[self.ttd % len(chars.C_MONSTERS)]
 
     def kill(self):
         """
@@ -265,7 +270,7 @@ class Treasure:
     GOLD = 2
     STRENGH = 3
     POWER = 4
-    CHARS = [C_HEART, C_BULLET_CHRG, C_MONEY]
+    CHARS = [chars.C_HEART, chars.C_BULLET_CHRG, chars.C_MONEY]
 
     def __init__(self, pos, value):
         """
@@ -288,11 +293,10 @@ class Treasure:
         """
         if self.value == 1:
             return self.CHARS[self.object]
-        else:
-            self.cpt += 1
-            if self.value == 2:
-                return C_TRE_WEAPON[self.cpt % len(C_TRE_WEAPON)]
-        return C_TRE_GUN[self.cpt % len(C_TRE_GUN)]
+        self.cpt += 1
+        if self.value == 2:
+            return chars.C_TRE_WEAPON[self.cpt % len(chars.C_TRE_WEAPON)]
+        return chars.C_TRE_GUN[self.cpt % len(chars.C_TRE_GUN)]
 
     def get_value(self):
         """
@@ -329,7 +333,8 @@ class Sword:
         """
         render
         """
-        return C_SWORDS[- self.cpt % len(C_SWORDS)]
+        return chars.C_SWORDS[- self.cpt % len(chars.C_SWORDS)]
+
 
 class Door:
     """
@@ -342,18 +347,25 @@ class Door:
         """
         self.pos = pos
         self.cpt = 0
+
+    def update(self):
+        """
+        Update
+        """
+
     def render(self):
         """
         Render
         """
         self.cpt += 1
-        return C_DOORS[self.cpt % len(C_DOORS)]
+        return chars.C_DOORS[self.cpt % len(chars.C_DOORS)]
 
 
 def main():
     """
     Test unitaire
     """
+
 
 if __name__ == '__main__':
     main()

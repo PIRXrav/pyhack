@@ -5,7 +5,7 @@ Définie la classe Village
 Un village est un tableau de pièce
 """
 
-from chars import *
+import chars
 from initroom import Room
 
 class Village:
@@ -125,7 +125,6 @@ class Village:
         """
         Genere les salles et leurs chemins
         """
-        import sys
         for _ in range(self.NB_ROOMS):
             print(self.addAndConnectNewRoom())
             # sys.stdout.flush()
@@ -137,7 +136,7 @@ class Village:
         Permet la création de matrice d'affichage
         """
         for room in self.rooms:
-            for pos, char in room.g_xyRender(C_ROOM_INSIDE):
+            for pos, char in room.g_xyRender(chars.C_ROOM_INSIDE):
                 yield (pos, char)
 
         for path in self.paths:
@@ -145,13 +144,13 @@ class Village:
             for index, pos in enumerate(path):
                 if index == 0:
                     # Porte de depart
-                    yield (pos, C_VILLAGE_PATH_DOOR)
+                    yield (pos, chars.C_VILLAGE_PATH_DOOR)
                 elif index == index_max:
                     # Porte d'arrivé
-                    yield (pos, C_VILLAGE_PATH_DOOR)
+                    yield (pos, chars.C_VILLAGE_PATH_DOOR)
                 else:
                     # Chemin
-                    yield (pos, C_VILLAGE_PATH)
+                    yield (pos, chars.C_VILLAGE_PATH)
 
     def g_xyCollide(self):
         """
@@ -170,7 +169,6 @@ class Village:
                 yield pos
 
 
-
 def main():
     """
     Test unitaire
@@ -178,7 +176,6 @@ def main():
     SIZE_Y = 50
     SIZE_X = 100
     screen = [[' ' for _ in range(SIZE_Y)] for _ in range(SIZE_X)]
-
 
     village = Village(SIZE_X, SIZE_Y, 15)
     village.generate()
@@ -200,7 +197,6 @@ def main():
         for x in range(SIZE_X):
             print(screen[x][SIZE_Y - y -1], end='')
         print("")
-
 
 
 if __name__ == '__main__':

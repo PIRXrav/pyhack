@@ -12,7 +12,7 @@ class Room():
     Classe définissant une pièce. Elle permet de l'initialiser
     et de la connecter à d'autres.
     """
-    #Dimentions maximales minimales
+    # Dimentions maximales minimales
     _VECT_COTE_MIN = Vect(10, 6)
     _VECT_COTE_MAX = Vect(10, 8)
 
